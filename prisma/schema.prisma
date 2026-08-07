@@ -1,0 +1,157 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  BUYER
+  SELLER
+}
+
+enum OrderType {
+  BUY
+  SELL
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum PaymentRequestKind {
+  SUBSCRIPTION
+  BOOST
+}
+
+enum PaymentRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         Role
+  phone        String?
+  suspended    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  // Notification bell — last time each role's order list was viewed
+  sellerOrdersViewedAt DateTime?
+  buyerOrdersViewedAt  DateTime?
+  marketViewedAt       DateTime?
+
+  // Seller KYC — foreign exchange dealer verification
+  isBusiness                Boolean            @default(false)
+  fxLicensePath             String?
+  businessRegistrationPath  String?
+  idCardPath                String?
+  livePhotoPath             String?
+  verificationStatus        VerificationStatus @default(PENDING)
+
+  // Admin-managed seller subscription (paid outside the app) and boost
+  // (pins the seller's rate to the top of the board for a set duration)
+  subscriptionActive    Boolean   @default(false)
+  subscriptionExpiresAt DateTime?
+  boostedUntil          DateTime?
+
+  sellerRates SellerRate[]
+
+  ordersAsBuyer   Order[]          @relation("BuyerOrders")
+  ordersAsSeller  Order[]          @relation("SellerOrders")
+  paymentRequests PaymentRequest[]
+}
+
+// Admin-managed catalog of purchasable subscription lengths.
+model SubscriptionTier {
+  id        String   @id @default(cuid())
+  name      String
+  days      Int
+  price     Float
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+// Admin-managed catalog of purchasable boost lengths.
+model BoostTier {
+  id        String   @id @default(cuid())
+  name      String
+  days      Int
+  price     Float
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+// Single row (id is always "singleton") holding the bank account details
+// shown to sellers for manual bank-transfer payment.
+model PaymentSettings {
+  id            String   @id @default("singleton")
+  bankName      String   @default("")
+  accountName   String   @default("")
+  accountNumber String   @default("")
+  branch        String   @default("")
+  instructions  String   @default("")
+  updatedAt     DateTime @updatedAt
+}
+
+// A seller's self-reported payment (with uploaded slip) for a subscription
+// renewal or a boost purchase, awaiting admin verification.
+model PaymentRequest {
+  id       String @id @default(cuid())
+  sellerId String
+  seller   User   @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+
+  kind     PaymentRequestKind
+  tierName String
+  amount   Float
+  days     Int
+  slipPath String
+
+  status     PaymentRequestStatus @default(PENDING)
+  createdAt  DateTime             @default(now())
+  reviewedAt DateTime?
+}
+
+model SellerRate {
+  id        String   @id @default(cuid())
+  sellerId  String
+  seller    User     @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  currency  String
+  buyRate   Float
+  sellRate  Float
+  updatedAt DateTime @updatedAt
+
+  @@unique([sellerId, currency])
+}
+
+model Order {
+  id           String      @id @default(cuid())
+  type         OrderType
+  currency     String
+  amount       Float
+  rate         Float
+  contactPhone String      @default("")
+  status       OrderStatus @default(PENDING)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  buyerId  String
+  buyer    User   @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: Cascade)
+  sellerId String
+  seller   User   @relation("SellerOrders", fields: [sellerId], references: [id], onDelete: Cascade)
+}
