@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { verifySession } from "@/lib/dal";
+import AutoRefresh from "@/components/AutoRefresh";
 import RateForm from "@/components/RateForm";
 import VerificationBadge from "@/components/VerificationBadge";
 import { isSubscriptionActive, isBoosted } from "@/lib/boost";
@@ -31,6 +32,7 @@ export default async function SellerDashboard() {
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
+      <AutoRefresh />
       <div className="flex items-center gap-3">
         <h1 className="text-2xl font-semibold">Seller dashboard</h1>
         <VerificationBadge status={me.verificationStatus} />

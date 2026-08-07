@@ -48,3 +48,6 @@ next-env.d.ts
 
 # uploaded KYC documents — never commit real ID/license files
 /uploads
+
+.vercel
+.env*

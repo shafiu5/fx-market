@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { getOptionalSession } from "@/lib/dal";
+import AutoRefresh from "@/components/AutoRefresh";
 import VerificationBadge from "@/components/VerificationBadge";
 import BoostBadge from "@/components/BoostBadge";
 import RateStatBoxes from "@/components/RateStatBoxes";
@@ -69,6 +70,7 @@ export default async function Home({
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
+      <AutoRefresh />
       <h1 className="text-2xl font-semibold">
         {currency}/{LOCAL_CURRENCY} street rates
       </h1>

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { verifySession } from "@/lib/dal";
 import { markMarketSeen } from "@/app/actions/notifications";
+import AutoRefresh from "@/components/AutoRefresh";
 import VerificationBadge from "@/components/VerificationBadge";
 import BoostBadge from "@/components/BoostBadge";
 import RateStatBoxes from "@/components/RateStatBoxes";
@@ -63,6 +64,7 @@ export default async function SellerMarketPage({
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
       <MarkOrdersSeen action={markMarketSeen} />
+      <AutoRefresh />
       <h1 className="text-2xl font-semibold">Competitor rates</h1>
       <p className="mt-1 text-sm text-zinc-500">
         What other sellers are posting for {currency}/{LOCAL_CURRENCY}, best

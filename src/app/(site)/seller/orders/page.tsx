@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { verifySession } from "@/lib/dal";
 import { markSellerOrdersSeen } from "@/app/actions/notifications";
+import AutoRefresh from "@/components/AutoRefresh";
 import OrderStatusButtons from "@/components/OrderStatusButtons";
 import MarkOrdersSeen from "@/components/MarkOrdersSeen";
 import { LOCAL_CURRENCY } from "@/lib/config";
@@ -64,6 +65,7 @@ export default async function SellerOrdersPage({
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
       <MarkOrdersSeen action={markSellerOrdersSeen} />
+      <AutoRefresh />
       <h1 className="text-2xl font-semibold">Orders</h1>
       <p className="mt-1 text-sm text-zinc-500">
         All buy and sell requests placed with you.
