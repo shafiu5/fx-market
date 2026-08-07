@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts",
+    "seed:bots": "tsx scripts/seed-bot-sellers.ts",
+    "bots:run": "tsx scripts/seller-bot.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.9.1",
