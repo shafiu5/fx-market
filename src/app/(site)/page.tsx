@@ -4,6 +4,7 @@ import { getOptionalSession } from "@/lib/dal";
 import AutoRefresh from "@/components/AutoRefresh";
 import VerificationBadge from "@/components/VerificationBadge";
 import BoostBadge from "@/components/BoostBadge";
+import RateFlashBox from "@/components/RateFlashBox";
 import { isBoosted } from "@/lib/boost";
 import {
   LOCAL_CURRENCY,
@@ -146,24 +147,18 @@ export default async function Home({
                 </div>
 
                 <div className="flex shrink-0 gap-2">
-                  <Link
+                  <RateFlashBox
                     href={buyHref}
-                    className="rounded-md bg-zinc-50 px-3 py-2 text-right transition-colors hover:bg-zinc-100 dark:bg-zinc-900 dark:hover:bg-zinc-800"
-                  >
-                    <p className="text-xs text-zinc-500">They buy at</p>
-                    <p className="font-medium">
-                      {row.buyRate.toFixed(4)} {LOCAL_CURRENCY}
-                    </p>
-                  </Link>
-                  <Link
+                    label="They buy at"
+                    rate={row.buyRate}
+                    favorableDirection="up"
+                  />
+                  <RateFlashBox
                     href={sellHref}
-                    className="rounded-md bg-zinc-50 px-3 py-2 text-right transition-colors hover:bg-zinc-100 dark:bg-zinc-900 dark:hover:bg-zinc-800"
-                  >
-                    <p className="text-xs text-zinc-500">They sell at</p>
-                    <p className="font-medium">
-                      {row.sellRate.toFixed(4)} {LOCAL_CURRENCY}
-                    </p>
-                  </Link>
+                    label="They sell at"
+                    rate={row.sellRate}
+                    favorableDirection="down"
+                  />
                 </div>
               </div>
             );
