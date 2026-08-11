@@ -50,7 +50,7 @@ export default function RateFlashBox({
     >
       <p className="text-xs text-zinc-500">{label}</p>
       <p className="font-medium">
-        {rate.toFixed(4)} {LOCAL_CURRENCY}
+        {rate.toFixed(2)} {LOCAL_CURRENCY}
       </p>
     </Link>
   );

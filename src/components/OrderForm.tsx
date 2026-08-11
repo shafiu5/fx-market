@@ -65,7 +65,7 @@ export default function OrderForm({
       </div>
 
       <p className="text-sm text-zinc-500">
-        Rate: {rate.toFixed(4)} {LOCAL_CURRENCY} per {currency}
+        Rate: {rate.toFixed(2)} {LOCAL_CURRENCY} per {currency}
       </p>
 
       {state?.message && (

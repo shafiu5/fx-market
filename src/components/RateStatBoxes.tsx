@@ -12,13 +12,13 @@ export default function RateStatBoxes({
       <div className="rounded-md bg-zinc-50 px-3 py-2 dark:bg-zinc-900">
         <p className="text-xs text-zinc-500">They buy at</p>
         <p className="font-medium">
-          {buyRate.toFixed(4)} {LOCAL_CURRENCY}
+          {buyRate.toFixed(2)} {LOCAL_CURRENCY}
         </p>
       </div>
       <div className="rounded-md bg-zinc-50 px-3 py-2 dark:bg-zinc-900">
         <p className="text-xs text-zinc-500">They sell at</p>
         <p className="font-medium">
-          {sellRate.toFixed(4)} {LOCAL_CURRENCY}
+          {sellRate.toFixed(2)} {LOCAL_CURRENCY}
         </p>
       </div>
     </div>

@@ -134,7 +134,7 @@ export default async function SellerOrdersPage({
                   <p className="text-sm font-medium">
                     {order.type === "BUY" ? "Buying" : "Selling"}{" "}
                     {order.amount.toLocaleString()} {order.currency} @{" "}
-                    {order.rate.toFixed(4)} {LOCAL_CURRENCY}
+                    {order.rate.toFixed(2)} {LOCAL_CURRENCY}
                   </p>
                   <p className="text-xs text-zinc-500">
                     {order.buyer.name} · {order.buyer.email} ·{" "}

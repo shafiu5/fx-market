@@ -125,10 +125,10 @@ export default async function AdminRatesPage({
                     </td>
                     <td className="px-4 py-3 font-medium">{rate.currency}</td>
                     <td className="px-4 py-3">
-                      {rate.buyRate.toFixed(4)} {LOCAL_CURRENCY}
+                      {rate.buyRate.toFixed(2)} {LOCAL_CURRENCY}
                     </td>
                     <td className="px-4 py-3">
-                      {rate.sellRate.toFixed(4)} {LOCAL_CURRENCY}
+                      {rate.sellRate.toFixed(2)} {LOCAL_CURRENCY}
                     </td>
                     <td className="px-4 py-3">
                       <span className="text-zinc-500">
