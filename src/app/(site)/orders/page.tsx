@@ -19,7 +19,7 @@ export default async function OrdersPage() {
 
   const orders = await db.order.findMany({
     where: { buyerId: session.userId },
-    include: { seller: { select: { name: true, email: true } } },
+    include: { seller: { select: { name: true, email: true, phone: true } } },
     orderBy: { createdAt: "desc" },
   });
 
@@ -50,6 +50,17 @@ export default async function OrdersPage() {
                   Seller: {order.seller.name} · {order.seller.email} ·{" "}
                   {new Date(order.createdAt).toLocaleString()}
                 </p>
+                {order.seller.phone && (
+                  <p className="mt-1 text-sm">
+                    Seller contact:{" "}
+                    <a
+                      href={`tel:${order.seller.phone}`}
+                      className="font-medium underline"
+                    >
+                      {order.seller.phone}
+                    </a>
+                  </p>
+                )}
                 <p className="mt-1 text-xs text-zinc-500">
                   Contact number given: {order.contactPhone}
                 </p>

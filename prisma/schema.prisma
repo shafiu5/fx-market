@@ -139,6 +139,18 @@ model SellerRate {
   @@unique([sellerId, currency])
 }
 
+// Point-in-time snapshot of the market's best (buyer-favorable) rate for a
+// currency, recorded whenever any seller's rate for it changes. Powers the
+// small trend graph on the rate board.
+model RateSnapshot {
+  id        String   @id @default(cuid())
+  currency  String
+  rate      Float
+  createdAt DateTime @default(now())
+
+  @@index([currency, createdAt])
+}
+
 model Order {
   id           String      @id @default(cuid())
   type         OrderType

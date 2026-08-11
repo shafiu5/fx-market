@@ -19,6 +19,7 @@ async function main() {
     const user = await db.user.upsert({
       where: { email },
       update: {
+        phone: s.phone,
         isBusiness: s.isBusiness,
         verificationStatus: s.verificationStatus,
         subscriptionActive: true,
@@ -29,6 +30,7 @@ async function main() {
       create: {
         name: s.name,
         email,
+        phone: s.phone,
         passwordHash,
         role: "SELLER",
         isBusiness: s.isBusiness,

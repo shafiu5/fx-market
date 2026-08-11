@@ -30,6 +30,7 @@ export default async function NewOrderPage({
         seller: {
           select: {
             name: true,
+            phone: true,
             verificationStatus: true,
             suspended: true,
             subscriptionActive: true,
@@ -64,6 +65,15 @@ export default async function NewOrderPage({
       </h1>
       <p className="mt-1 text-sm text-zinc-500">
         With {sellerRate.seller.name}
+        {sellerRate.seller.phone && (
+          <>
+            {" "}
+            ·{" "}
+            <a href={`tel:${sellerRate.seller.phone}`} className="underline">
+              {sellerRate.seller.phone}
+            </a>
+          </>
+        )}
       </p>
 
       {!isVerified && (

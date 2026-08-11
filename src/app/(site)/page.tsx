@@ -5,14 +5,10 @@ import AutoRefresh from "@/components/AutoRefresh";
 import VerificationBadge from "@/components/VerificationBadge";
 import BoostBadge from "@/components/BoostBadge";
 import RateFlashBox from "@/components/RateFlashBox";
+import RateSparkline from "@/components/RateSparkline";
+import CurrencySelect from "@/components/CurrencySelect";
 import { isBoosted } from "@/lib/boost";
-import {
-  LOCAL_CURRENCY,
-  CURRENCIES,
-  DEFAULT_CURRENCY,
-  isCurrencyCode,
-  currencyName,
-} from "@/lib/config";
+import { DEFAULT_CURRENCY, isCurrencyCode, currencyName } from "@/lib/config";
 
 const SORTS = [
   {
@@ -41,7 +37,7 @@ export default async function Home({
     rawCurrency && isCurrencyCode(rawCurrency) ? rawCurrency : DEFAULT_CURRENCY;
   const sort: Sort = rawSort === "sell" ? "sell" : "buy";
 
-  const [session, sellersRaw] = await Promise.all([
+  const [session, sellersRaw, snapshots] = await Promise.all([
     getOptionalSession(),
     db.sellerRate.findMany({
       where: {
@@ -58,6 +54,12 @@ export default async function Home({
       orderBy:
         sort === "sell" ? { buyRate: "desc" } : { sellRate: "asc" },
     }),
+    db.rateSnapshot.findMany({
+      where: { currency },
+      orderBy: { createdAt: "desc" },
+      take: 40,
+      select: { rate: true },
+    }),
   ]);
 
   // Boosted sellers pin to the top; stable sort preserves the rate-based
@@ -68,48 +70,39 @@ export default async function Home({
     return aBoosted - bBoosted;
   });
 
+  const sparklinePoints = snapshots.map((s) => s.rate).reverse();
+
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
       <AutoRefresh />
-      <h1 className="text-2xl font-semibold">
-        {currency}/{LOCAL_CURRENCY} street rates
-      </h1>
+      <h1 className="text-2xl font-semibold">Foreign exchange rates</h1>
       <p className="mt-1 text-sm text-zinc-500">
         Live rates posted by independent sellers.{" "}
         {SORTS.find((s) => s.value === sort)?.description(currency)}
       </p>
 
-      <div className="mt-6 flex flex-wrap gap-2">
-        {CURRENCIES.map((c) => (
-          <Link
-            key={c.code}
-            href={`/?currency=${c.code}&sort=${sort}`}
-            className={`rounded-full px-3 py-1.5 text-sm font-medium ${
-              c.code === currency
-                ? "bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900"
-                : "border border-zinc-300 text-zinc-600 dark:border-zinc-700 dark:text-zinc-400"
-            }`}
-          >
-            {c.code}
-          </Link>
-        ))}
+      <div className="mt-6 flex flex-wrap items-center gap-3">
+        <CurrencySelect currency={currency} sort={sort} />
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-medium text-zinc-500">Sort:</span>
+          {SORTS.map((s) => (
+            <Link
+              key={s.value}
+              href={`/?currency=${currency}&sort=${s.value}`}
+              className={`rounded-full px-3 py-1.5 text-sm font-medium ${
+                s.value === sort
+                  ? "bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900"
+                  : "border border-zinc-300 text-zinc-600 dark:border-zinc-700 dark:text-zinc-400"
+              }`}
+            >
+              {s.label}
+            </Link>
+          ))}
+        </div>
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        <span className="text-xs font-medium text-zinc-500">Sort:</span>
-        {SORTS.map((s) => (
-          <Link
-            key={s.value}
-            href={`/?currency=${currency}&sort=${s.value}`}
-            className={`rounded-full px-3 py-1.5 text-sm font-medium ${
-              s.value === sort
-                ? "bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900"
-                : "border border-zinc-300 text-zinc-600 dark:border-zinc-700 dark:text-zinc-400"
-            }`}
-          >
-            {s.label}
-          </Link>
-        ))}
+      <div className="mt-4">
+        <RateSparkline currency={currency} points={sparklinePoints} />
       </div>
 
       {sellers.length === 0 ? (

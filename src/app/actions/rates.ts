@@ -6,6 +6,7 @@ import { verifySession } from "@/lib/dal";
 import { RateSchema, RateFormState } from "@/lib/definitions";
 import { isCurrencyCode } from "@/lib/config";
 import { isSubscriptionActive } from "@/lib/boost";
+import { recordRateSnapshot } from "@/lib/rateHistory";
 
 export async function updateRate(
   _state: RateFormState,
@@ -48,6 +49,7 @@ export async function updateRate(
     update: { buyRate, sellRate },
     create: { sellerId: session.userId, currency, buyRate, sellRate },
   });
+  await recordRateSnapshot(currency);
 
   revalidatePath("/");
   revalidatePath("/seller");

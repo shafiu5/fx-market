@@ -77,14 +77,28 @@ async function pollOrders(botIds: string[]) {
 
 async function nudgeRates(botIds: string[]) {
   const rates = await db.sellerRate.findMany({ where: { sellerId: { in: botIds } } });
+  const currencies = new Set<string>();
   for (const r of rates) {
     const buyRate = round2(r.buyRate * (1 + (Math.random() * 2 - 1) * RATE_NUDGE_PCT));
     const sellRate = round2(
       Math.max(r.sellRate * (1 + (Math.random() * 2 - 1) * RATE_NUDGE_PCT), buyRate + 0.02)
     );
     await db.sellerRate.update({ where: { id: r.id }, data: { buyRate, sellRate } });
+    currencies.add(r.currency);
   }
   console.log(`[bot] nudged ${rates.length} rates`);
+
+  // Snapshot the market's best (lowest) rate to buy each touched currency —
+  // same metric the rate board's default sort and the trend graph use.
+  for (const currency of currencies) {
+    const best = await db.sellerRate.aggregate({
+      where: { currency, buyRate: { gt: 0 }, sellRate: { gt: 0 }, seller: { suspended: false } },
+      _min: { sellRate: true },
+    });
+    if (best._min.sellRate != null) {
+      await db.rateSnapshot.create({ data: { currency, rate: best._min.sellRate } });
+    }
+  }
 }
 
 async function main() {

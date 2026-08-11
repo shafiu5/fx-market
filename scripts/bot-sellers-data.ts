@@ -7,6 +7,7 @@ export const BOT_PASSWORD = "DemoBot123!";
 export type BotSellerSeed = {
   slug: string;
   name: string;
+  phone: string;
   isBusiness: boolean;
   verificationStatus: "VERIFIED" | "PENDING";
   boosted: boolean;
@@ -17,6 +18,7 @@ export const BOT_SELLERS: BotSellerSeed[] = [
   {
     slug: "male-city",
     name: "Male City Exchange",
+    phone: "+960 771-2001",
     isBusiness: true,
     verificationStatus: "VERIFIED",
     boosted: true,
@@ -25,6 +27,7 @@ export const BOT_SELLERS: BotSellerSeed[] = [
   {
     slug: "hulhumale-fx",
     name: "Hulhumale FX Point",
+    phone: "+960 772-2002",
     isBusiness: false,
     verificationStatus: "PENDING",
     boosted: false,
@@ -33,6 +36,7 @@ export const BOT_SELLERS: BotSellerSeed[] = [
   {
     slug: "airport-corner",
     name: "Airport Corner Exchange",
+    phone: "+960 773-2003",
     isBusiness: true,
     verificationStatus: "VERIFIED",
     boosted: false,
@@ -41,6 +45,7 @@ export const BOT_SELLERS: BotSellerSeed[] = [
   {
     slug: "addu-money",
     name: "Addu Money Changers",
+    phone: "+960 774-2004",
     isBusiness: false,
     verificationStatus: "PENDING",
     boosted: false,
@@ -49,6 +54,7 @@ export const BOT_SELLERS: BotSellerSeed[] = [
   {
     slug: "villa-point",
     name: "Villa Point Forex",
+    phone: "+960 775-2005",
     isBusiness: true,
     verificationStatus: "VERIFIED",
     boosted: false,
@@ -57,6 +63,7 @@ export const BOT_SELLERS: BotSellerSeed[] = [
   {
     slug: "coral-hub",
     name: "Coral Currency Hub",
+    phone: "+960 776-2006",
     isBusiness: false,
     verificationStatus: "PENDING",
     boosted: false,
@@ -65,6 +72,7 @@ export const BOT_SELLERS: BotSellerSeed[] = [
   {
     slug: "maafushi-fx",
     name: "Maafushi FX Corner",
+    phone: "+960 777-2007",
     isBusiness: true,
     verificationStatus: "PENDING",
     boosted: false,
@@ -73,6 +81,7 @@ export const BOT_SELLERS: BotSellerSeed[] = [
   {
     slug: "nasheed-forex",
     name: "Nasheed Forex Services",
+    phone: "+960 778-2008",
     isBusiness: false,
     verificationStatus: "VERIFIED",
     boosted: false,
