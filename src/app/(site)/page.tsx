@@ -4,7 +4,6 @@ import { getOptionalSession } from "@/lib/dal";
 import AutoRefresh from "@/components/AutoRefresh";
 import VerificationBadge from "@/components/VerificationBadge";
 import BoostBadge from "@/components/BoostBadge";
-import RateStatBoxes from "@/components/RateStatBoxes";
 import { isBoosted } from "@/lib/boost";
 import {
   LOCAL_CURRENCY,
@@ -117,53 +116,58 @@ export default async function Home({
           No sellers have posted {currency} rates yet.
         </p>
       ) : (
-        <div className="mt-6 flex flex-col gap-3">
-          {sellers.map((row) => (
-            <div
-              key={row.id}
-              className={`rounded-lg border p-4 ${
-                isBoosted(row.seller)
-                  ? "border-purple-300 bg-purple-50 dark:border-purple-800 dark:bg-purple-950/20"
-                  : "border-zinc-200 dark:border-zinc-800"
-              }`}
-            >
-              <div className="flex flex-wrap items-center gap-2">
-                <p className="font-medium">{row.seller.name}</p>
-                <VerificationBadge status={row.seller.verificationStatus} />
-                {isBoosted(row.seller) && <BoostBadge />}
-              </div>
-              <p className="mt-0.5 text-xs text-zinc-500">
-                Updated {new Date(row.updatedAt).toLocaleString()}
-              </p>
+        <div className="mt-6 flex flex-col gap-2">
+          {sellers.map((row) => {
+            const buyHref = session
+              ? `/order/${row.seller.id}?type=SELL&currency=${currency}`
+              : "/login";
+            const sellHref = session
+              ? `/order/${row.seller.id}?type=BUY&currency=${currency}`
+              : "/login";
 
-              <div className="mt-3">
-                <RateStatBoxes buyRate={row.buyRate} sellRate={row.sellRate} />
-              </div>
+            return (
+              <div
+                key={row.id}
+                className={`flex items-center justify-between gap-3 rounded-lg border p-3 ${
+                  isBoosted(row.seller)
+                    ? "border-purple-300 bg-purple-50 dark:border-purple-800 dark:bg-purple-950/20"
+                    : "border-zinc-200 dark:border-zinc-800"
+                }`}
+              >
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="truncate font-medium">{row.seller.name}</p>
+                    <VerificationBadge status={row.seller.verificationStatus} />
+                    {isBoosted(row.seller) && <BoostBadge />}
+                  </div>
+                  <p className="mt-0.5 text-xs text-zinc-500">
+                    Updated {new Date(row.updatedAt).toLocaleString()}
+                  </p>
+                </div>
 
-              <div className="mt-3 flex gap-2">
-                <Link
-                  href={
-                    session
-                      ? `/order/${row.seller.id}?type=BUY&currency=${currency}`
-                      : "/login"
-                  }
-                  className="flex-1 rounded-md bg-zinc-900 px-3 py-2 text-center text-sm font-medium text-white dark:bg-zinc-50 dark:text-zinc-900"
-                >
-                  Buy {currency}
-                </Link>
-                <Link
-                  href={
-                    session
-                      ? `/order/${row.seller.id}?type=SELL&currency=${currency}`
-                      : "/login"
-                  }
-                  className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-center text-sm font-medium dark:border-zinc-700"
-                >
-                  Sell {currency}
-                </Link>
+                <div className="flex shrink-0 gap-2">
+                  <Link
+                    href={buyHref}
+                    className="rounded-md bg-zinc-50 px-3 py-2 text-right transition-colors hover:bg-zinc-100 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+                  >
+                    <p className="text-xs text-zinc-500">They buy at</p>
+                    <p className="font-medium">
+                      {row.buyRate.toFixed(4)} {LOCAL_CURRENCY}
+                    </p>
+                  </Link>
+                  <Link
+                    href={sellHref}
+                    className="rounded-md bg-zinc-50 px-3 py-2 text-right transition-colors hover:bg-zinc-100 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+                  >
+                    <p className="text-xs text-zinc-500">They sell at</p>
+                    <p className="font-medium">
+                      {row.sellRate.toFixed(4)} {LOCAL_CURRENCY}
+                    </p>
+                  </Link>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
