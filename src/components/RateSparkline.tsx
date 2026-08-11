@@ -7,14 +7,16 @@ const PADDING = 4;
 export default function RateSparkline({
   currency,
   points,
+  rangeLabel,
 }: {
   currency: string;
   points: number[];
+  rangeLabel: string;
 }) {
   if (points.length < 2) {
     return (
       <div className="flex h-16 items-center justify-center rounded-lg border border-zinc-200 text-xs text-zinc-400 dark:border-zinc-800">
-        Not enough history yet to chart {currency} movement.
+        Not enough {rangeLabel} history yet to chart {currency} movement.
       </div>
     );
   }
@@ -42,7 +44,7 @@ export default function RateSparkline({
     <div className="rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
       <div className="flex items-center justify-between">
         <p className="text-xs text-zinc-500">
-          {currency} best buy rate — recent movement
+          {currency} best buy rate — last {rangeLabel}
         </p>
         <p className={`text-xs font-medium ${rose ? "text-emerald-600" : "text-red-600"}`}>
           {last.toFixed(2)} {LOCAL_CURRENCY}

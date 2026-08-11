@@ -27,15 +27,28 @@ const SORTS = [
 
 type Sort = (typeof SORTS)[number]["value"];
 
+const RANGES = [
+  { value: "1d", label: "1D", ms: 24 * 60 * 60 * 1000 },
+  { value: "1w", label: "1W", ms: 7 * 24 * 60 * 60 * 1000 },
+  { value: "1m", label: "1M", ms: 30 * 24 * 60 * 60 * 1000 },
+  { value: "1y", label: "1Y", ms: 365 * 24 * 60 * 60 * 1000 },
+] as const;
+
+type Range = (typeof RANGES)[number]["value"];
+
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ currency?: string; sort?: string }>;
+  searchParams: Promise<{ currency?: string; sort?: string; range?: string }>;
 }) {
-  const { currency: rawCurrency, sort: rawSort } = await searchParams;
+  const { currency: rawCurrency, sort: rawSort, range: rawRange } = await searchParams;
   const currency =
     rawCurrency && isCurrencyCode(rawCurrency) ? rawCurrency : DEFAULT_CURRENCY;
   const sort: Sort = rawSort === "sell" ? "sell" : "buy";
+  const range: Range = RANGES.some((r) => r.value === rawRange)
+    ? (rawRange as Range)
+    : "1d";
+  const since = new Date(Date.now() - RANGES.find((r) => r.value === range)!.ms);
 
   const [session, sellersRaw, snapshots] = await Promise.all([
     getOptionalSession(),
@@ -55,9 +68,9 @@ export default async function Home({
         sort === "sell" ? { buyRate: "desc" } : { sellRate: "asc" },
     }),
     db.rateSnapshot.findMany({
-      where: { currency },
-      orderBy: { createdAt: "desc" },
-      take: 40,
+      where: { currency, createdAt: { gte: since } },
+      orderBy: { createdAt: "asc" },
+      take: 500,
       select: { rate: true },
     }),
   ]);
@@ -70,7 +83,7 @@ export default async function Home({
     return aBoosted - bBoosted;
   });
 
-  const sparklinePoints = snapshots.map((s) => s.rate).reverse();
+  const sparklinePoints = snapshots.map((s) => s.rate);
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
@@ -82,13 +95,13 @@ export default async function Home({
       </p>
 
       <div className="mt-6 flex flex-wrap items-center gap-3">
-        <CurrencySelect currency={currency} sort={sort} />
+        <CurrencySelect currency={currency} sort={sort} range={range} />
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs font-medium text-zinc-500">Sort:</span>
           {SORTS.map((s) => (
             <Link
               key={s.value}
-              href={`/?currency=${currency}&sort=${s.value}`}
+              href={`/?currency=${currency}&sort=${s.value}&range=${range}`}
               className={`rounded-full px-3 py-1.5 text-sm font-medium ${
                 s.value === sort
                   ? "bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900"
@@ -102,7 +115,26 @@ export default async function Home({
       </div>
 
       <div className="mt-4">
-        <RateSparkline currency={currency} points={sparklinePoints} />
+        <div className="mb-2 flex justify-end gap-1">
+          {RANGES.map((r) => (
+            <Link
+              key={r.value}
+              href={`/?currency=${currency}&sort=${sort}&range=${r.value}`}
+              className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                r.value === range
+                  ? "bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900"
+                  : "border border-zinc-300 text-zinc-600 dark:border-zinc-700 dark:text-zinc-400"
+              }`}
+            >
+              {r.label}
+            </Link>
+          ))}
+        </div>
+        <RateSparkline
+          currency={currency}
+          points={sparklinePoints}
+          rangeLabel={RANGES.find((r) => r.value === range)!.label}
+        />
       </div>
 
       {sellers.length === 0 ? (
