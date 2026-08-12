@@ -93,7 +93,11 @@ export async function approvePaymentRequest(requestId: string): Promise<void> {
       where: { id: request.sellerId },
       data:
         request.kind === "SUBSCRIPTION"
-          ? { subscriptionActive: true, subscriptionExpiresAt: addDays(request.days) }
+          ? {
+              subscriptionActive: true,
+              subscriptionExpiresAt: addDays(request.days),
+              subscriptionReminderSentAt: null,
+            }
           : { boostedUntil: addDays(request.days) },
     }),
   ]);

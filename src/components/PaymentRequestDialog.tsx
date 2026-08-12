@@ -33,10 +33,17 @@ export default function PaymentRequestDialog({
 }) {
   const [open, setOpen] = useState(false);
   const [state, formAction, pending] = useActionState(action, undefined);
+  const [selectedTierId, setSelectedTierId] = useState<string | null>(null);
+  const selectedTier = tiers.find((t) => t.id === selectedTierId);
+  const isFree = selectedTier?.price === 0;
 
   useEffect(() => {
     if (hasPendingRequest) setOpen(false);
   }, [hasPendingRequest]);
+
+  useEffect(() => {
+    if (state?.activated) setOpen(false);
+  }, [state?.activated]);
 
   if (hasPendingRequest) {
     return (
@@ -86,40 +93,58 @@ export default function PaymentRequestDialog({
                         className="flex items-center justify-between gap-2 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700"
                       >
                         <span className="flex items-center gap-2">
-                          <input type="radio" name="tierId" value={t.id} required />
+                          <input
+                            type="radio"
+                            name="tierId"
+                            value={t.id}
+                            required
+                            checked={selectedTierId === t.id}
+                            onChange={() => setSelectedTierId(t.id)}
+                          />
                           {t.name} · {t.days} days
                         </span>
                         <span className="font-medium">
-                          {t.price.toLocaleString()} {LOCAL_CURRENCY}
+                          {t.price === 0
+                            ? "Free"
+                            : `${t.price.toLocaleString()} ${LOCAL_CURRENCY}`}
                         </span>
                       </label>
                     ))}
                   </div>
                 </fieldset>
 
-                <div className="rounded-md border border-zinc-200 p-3 text-sm dark:border-zinc-800">
-                  <p className="mb-1 font-medium">Bank transfer details</p>
-                  <p>Bank: {bank.bankName || "—"}</p>
-                  <p>Account name: {bank.accountName || "—"}</p>
-                  <p>Account number: {bank.accountNumber || "—"}</p>
-                  {bank.branch && <p>Branch: {bank.branch}</p>}
-                  {bank.instructions && (
-                    <p className="mt-1 text-zinc-500">{bank.instructions}</p>
-                  )}
-                </div>
+                {isFree ? (
+                  <p className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300">
+                    This plan is free — no payment or slip needed. It activates
+                    as soon as you submit.
+                  </p>
+                ) : (
+                  <>
+                    <div className="rounded-md border border-zinc-200 p-3 text-sm dark:border-zinc-800">
+                      <p className="mb-1 font-medium">Bank transfer details</p>
+                      <p>Bank: {bank.bankName || "—"}</p>
+                      <p>Account name: {bank.accountName || "—"}</p>
+                      <p>Account number: {bank.accountNumber || "—"}</p>
+                      {bank.branch && <p>Branch: {bank.branch}</p>}
+                      {bank.instructions && (
+                        <p className="mt-1 text-zinc-500">{bank.instructions}</p>
+                      )}
+                    </div>
 
-                <div>
-                  <label className="mb-1 block text-sm font-medium">
-                    Upload payment slip
-                  </label>
-                  <input
-                    type="file"
-                    name="slip"
-                    accept="image/*,application/pdf"
-                    required
-                    className="w-full text-sm"
-                  />
-                </div>
+                    <div>
+                      <label className="mb-1 block text-sm font-medium">
+                        Upload payment slip
+                      </label>
+                      <input
+                        type="file"
+                        name="slip"
+                        accept="image/*,application/pdf"
+                        required
+                        className="w-full text-sm"
+                      />
+                    </div>
+                  </>
+                )}
 
                 {state?.error && (
                   <p className="text-xs text-red-600">{state.error}</p>
@@ -130,7 +155,7 @@ export default function PaymentRequestDialog({
                   disabled={pending}
                   className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-900"
                 >
-                  {pending ? "Submitting…" : "Submit request"}
+                  {pending ? "Submitting…" : isFree ? "Activate free plan" : "Submit request"}
                 </button>
               </form>
             )}

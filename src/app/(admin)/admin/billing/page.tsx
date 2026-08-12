@@ -24,7 +24,8 @@ function TierRow({
       <div>
         <p className="font-medium">{tier.name}</p>
         <p className="text-xs text-zinc-500">
-          {tier.days} days · {tier.price.toLocaleString()} {LOCAL_CURRENCY}
+          {tier.days} days ·{" "}
+          {tier.price === 0 ? "Free" : `${tier.price.toLocaleString()} ${LOCAL_CURRENCY}`}
         </p>
       </div>
       <div className="flex items-center gap-2">

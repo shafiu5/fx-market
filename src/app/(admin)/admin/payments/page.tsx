@@ -120,14 +120,20 @@ export default async function AdminPaymentsPage({
                   <p className="text-xs text-zinc-500">
                     Requested {new Date(req.createdAt).toLocaleString()}
                   </p>
-                  <a
-                    href={`/files/${req.slipPath}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-1 inline-block text-xs font-medium underline"
-                  >
-                    View payment slip
-                  </a>
+                  {req.slipPath ? (
+                    <a
+                      href={`/files/${req.slipPath}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-1 inline-block text-xs font-medium underline"
+                    >
+                      View payment slip
+                    </a>
+                  ) : (
+                    <p className="mt-1 text-xs text-zinc-400 italic">
+                      No slip — free plan, auto-approved
+                    </p>
+                  )}
                 </div>
 
                 {req.status === "PENDING" && (

@@ -8,6 +8,16 @@ import {
   deleteAdminSession,
   isAdmin,
 } from "@/lib/admin-session";
+import { sendTelegramMessage } from "@/lib/telegram";
+
+const VERIFICATION_MESSAGES: Record<string, string> = {
+  VERIFIED:
+    "✅ <b>You're verified!</b>\nYour seller account now shows the Verified badge to buyers.",
+  REJECTED:
+    "❌ <b>Verification rejected</b>\nUpdate your documents in Settings and resubmit for review.",
+  PENDING:
+    "⏳ <b>Verification reset to pending</b>\nYour account is back under review.",
+};
 
 export type AdminLoginState = { message?: string } | undefined;
 
@@ -44,6 +54,10 @@ export async function setVerificationStatus(
     data: { verificationStatus: status },
   });
 
+  if (user.telegramChatId) {
+    await sendTelegramMessage(user.telegramChatId, VERIFICATION_MESSAGES[status]);
+  }
+
   revalidatePath("/admin/sellers");
   revalidatePath("/");
   revalidatePath("/seller");
@@ -69,7 +83,11 @@ export async function setSubscriptionStatus(
     data:
       days === null
         ? { subscriptionActive: false }
-        : { subscriptionActive: true, subscriptionExpiresAt: addDays(days) },
+        : {
+            subscriptionActive: true,
+            subscriptionExpiresAt: addDays(days),
+            subscriptionReminderSentAt: null,
+          },
   });
 
   revalidatePath("/admin/sellers");

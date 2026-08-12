@@ -66,9 +66,12 @@ model User {
 
   // Admin-managed seller subscription (paid outside the app) and boost
   // (pins the seller's rate to the top of the board for a set duration)
-  subscriptionActive    Boolean   @default(false)
-  subscriptionExpiresAt DateTime?
-  boostedUntil          DateTime?
+  subscriptionActive        Boolean   @default(false)
+  subscriptionExpiresAt     DateTime?
+  boostedUntil              DateTime?
+  // Set when the 1-day-before-expiry Telegram reminder is sent; cleared
+  // whenever the subscription is (re)activated, so the next cycle can remind again.
+  subscriptionReminderSentAt DateTime?
 
   // Set once the seller completes the Telegram bot's /start deep link;
   // used to DM them when a buyer places a new order.
@@ -124,7 +127,8 @@ model PaymentRequest {
   tierName String
   amount   Float
   days     Int
-  slipPath String
+  // Null for free (price 0) tiers, which auto-approve with nothing to verify.
+  slipPath String?
 
   status     PaymentRequestStatus @default(PENDING)
   createdAt  DateTime             @default(now())

@@ -82,11 +82,13 @@ export async function createOrder(
   });
 
   if (sellerRate.seller.telegramChatId) {
+    const ordersUrl = process.env.APP_URL ? `${process.env.APP_URL}/seller/orders` : null;
     await sendTelegramMessage(
       sellerRate.seller.telegramChatId,
       `🔔 <b>New ${type === "BUY" ? "buy" : "sell"} order</b>\n` +
         `${amount.toLocaleString()} ${currency} @ ${rate.toFixed(2)} ${LOCAL_CURRENCY}\n` +
-        `Buyer: ${me.name} (${contactPhone})`
+        `Buyer: ${me.name} (${contactPhone})` +
+        (ordersUrl ? `\n\n<a href="${ordersUrl}">View in Seller Orders</a>` : "")
     );
   }
 
