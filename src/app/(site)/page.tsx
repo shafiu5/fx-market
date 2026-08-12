@@ -7,6 +7,7 @@ import BoostBadge from "@/components/BoostBadge";
 import RateFlashBox from "@/components/RateFlashBox";
 import RateSparkline, { RANGES, Range } from "@/components/RateSparkline";
 import CurrencySelect from "@/components/CurrencySelect";
+import SellerSearch from "@/components/SellerSearch";
 import { isBoosted } from "@/lib/boost";
 import { DEFAULT_CURRENCY, isCurrencyCode, currencyName } from "@/lib/config";
 
@@ -30,9 +31,19 @@ type Sort = (typeof SORTS)[number]["value"];
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ currency?: string; sort?: string; range?: string }>;
+  searchParams: Promise<{
+    currency?: string;
+    sort?: string;
+    range?: string;
+    q?: string;
+  }>;
 }) {
-  const { currency: rawCurrency, sort: rawSort, range: rawRange } = await searchParams;
+  const {
+    currency: rawCurrency,
+    sort: rawSort,
+    range: rawRange,
+    q: rawQ,
+  } = await searchParams;
   const currency =
     rawCurrency && isCurrencyCode(rawCurrency) ? rawCurrency : DEFAULT_CURRENCY;
   const sort: Sort = rawSort === "sell" ? "sell" : "buy";
@@ -40,6 +51,7 @@ export default async function Home({
     ? (rawRange as Range)
     : "1d";
   const since = new Date(Date.now() - RANGES.find((r) => r.value === range)!.ms);
+  const q = (rawQ ?? "").trim();
 
   const [session, sellersRaw, snapshots] = await Promise.all([
     getOptionalSession(),
@@ -48,7 +60,10 @@ export default async function Home({
         currency,
         buyRate: { gt: 0 },
         sellRate: { gt: 0 },
-        seller: { suspended: false },
+        seller: {
+          suspended: false,
+          ...(q ? { name: { contains: q, mode: "insensitive" } } : {}),
+        },
       },
       include: {
         seller: {
@@ -113,9 +128,15 @@ export default async function Home({
         />
       </div>
 
+      <div className="mt-4">
+        <SellerSearch currency={currency} sort={sort} range={range} q={q} />
+      </div>
+
       {sellers.length === 0 ? (
         <p className="mt-10 text-sm text-zinc-500">
-          No sellers have posted {currency} rates yet.
+          {q
+            ? `No sellers matching "${q}".`
+            : `No sellers have posted ${currency} rates yet.`}
         </p>
       ) : (
         <div className="mt-6 flex flex-col gap-2">
@@ -130,19 +151,19 @@ export default async function Home({
             return (
               <div
                 key={row.id}
-                className={`flex items-center justify-between gap-3 rounded-lg border p-3 ${
+                className={`flex items-center justify-between gap-2 rounded-lg border p-3 ${
                   isBoosted(row.seller)
                     ? "border-purple-300 bg-purple-50 dark:border-purple-800 dark:bg-purple-950/20"
                     : "border-zinc-200 dark:border-zinc-800"
                 }`}
               >
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="truncate font-medium">{row.seller.name}</p>
                     <VerificationBadge status={row.seller.verificationStatus} />
                     {isBoosted(row.seller) && <BoostBadge />}
                   </div>
-                  <p className="mt-0.5 text-xs text-zinc-500">
+                  <p className="mt-0.5 truncate text-xs text-zinc-500">
                     Updated {new Date(row.updatedAt).toLocaleString()}
                   </p>
                 </div>
