@@ -5,7 +5,7 @@ import AutoRefresh from "@/components/AutoRefresh";
 import VerificationBadge from "@/components/VerificationBadge";
 import BoostBadge from "@/components/BoostBadge";
 import RateFlashBox from "@/components/RateFlashBox";
-import RateSparkline from "@/components/RateSparkline";
+import RateSparkline, { RANGES, Range } from "@/components/RateSparkline";
 import CurrencySelect from "@/components/CurrencySelect";
 import { isBoosted } from "@/lib/boost";
 import { DEFAULT_CURRENCY, isCurrencyCode, currencyName } from "@/lib/config";
@@ -26,15 +26,6 @@ const SORTS = [
 ] as const;
 
 type Sort = (typeof SORTS)[number]["value"];
-
-const RANGES = [
-  { value: "1d", label: "1D", ms: 24 * 60 * 60 * 1000 },
-  { value: "1w", label: "1W", ms: 7 * 24 * 60 * 60 * 1000 },
-  { value: "1m", label: "1M", ms: 30 * 24 * 60 * 60 * 1000 },
-  { value: "1y", label: "1Y", ms: 365 * 24 * 60 * 60 * 1000 },
-] as const;
-
-type Range = (typeof RANGES)[number]["value"];
 
 export default async function Home({
   searchParams,
@@ -115,25 +106,11 @@ export default async function Home({
       </div>
 
       <div className="mt-4">
-        <div className="mb-2 flex justify-end gap-1">
-          {RANGES.map((r) => (
-            <Link
-              key={r.value}
-              href={`/?currency=${currency}&sort=${sort}&range=${r.value}`}
-              className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-                r.value === range
-                  ? "bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900"
-                  : "border border-zinc-300 text-zinc-600 dark:border-zinc-700 dark:text-zinc-400"
-              }`}
-            >
-              {r.label}
-            </Link>
-          ))}
-        </div>
         <RateSparkline
           currency={currency}
+          sort={sort}
+          range={range}
           points={sparklinePoints}
-          rangeLabel={RANGES.find((r) => r.value === range)!.label}
         />
       </div>
 

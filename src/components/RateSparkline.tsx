@@ -1,22 +1,59 @@
+import Link from "next/link";
 import { LOCAL_CURRENCY } from "@/lib/config";
 
 const WIDTH = 600;
 const HEIGHT = 64;
 const PADDING = 4;
 
+export const RANGES = [
+  { value: "1d", label: "1D", ms: 24 * 60 * 60 * 1000 },
+  { value: "1w", label: "1W", ms: 7 * 24 * 60 * 60 * 1000 },
+  { value: "1m", label: "1M", ms: 30 * 24 * 60 * 60 * 1000 },
+  { value: "1y", label: "1Y", ms: 365 * 24 * 60 * 60 * 1000 },
+] as const;
+
+export type Range = (typeof RANGES)[number]["value"];
+
 export default function RateSparkline({
   currency,
+  sort,
+  range,
   points,
-  rangeLabel,
 }: {
   currency: string;
+  sort: string;
+  range: Range;
   points: number[];
-  rangeLabel: string;
 }) {
+  const rangeLabel = RANGES.find((r) => r.value === range)!.label;
+
+  const rangePills = (
+    <div className="flex shrink-0 gap-1">
+      {RANGES.map((r) => (
+        <Link
+          key={r.value}
+          href={`/?currency=${currency}&sort=${sort}&range=${r.value}`}
+          className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+            r.value === range
+              ? "bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900"
+              : "border border-zinc-300 text-zinc-600 dark:border-zinc-700 dark:text-zinc-400"
+          }`}
+        >
+          {r.label}
+        </Link>
+      ))}
+    </div>
+  );
+
   if (points.length < 2) {
     return (
-      <div className="flex h-16 items-center justify-center rounded-lg border border-zinc-200 text-xs text-zinc-400 dark:border-zinc-800">
-        Not enough {rangeLabel} history yet to chart {currency} movement.
+      <div className="rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
+        <div className="flex items-start justify-between gap-3">
+          <p className="text-xs text-zinc-400">
+            Not enough {rangeLabel} history yet to chart {currency} movement.
+          </p>
+          {rangePills}
+        </div>
       </div>
     );
   }
@@ -42,18 +79,23 @@ export default function RateSparkline({
 
   return (
     <div className="rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-zinc-500">
-          {currency} best buy rate — last {rangeLabel}
-        </p>
-        <p className={`text-xs font-medium ${rose ? "text-emerald-600" : "text-red-600"}`}>
-          {last.toFixed(2)} {LOCAL_CURRENCY}
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p
+            className={`text-3xl font-semibold tabular-nums ${rose ? "text-emerald-600" : "text-red-600"}`}
+          >
+            {last.toFixed(2)} {LOCAL_CURRENCY}
+          </p>
+          <p className="mt-0.5 text-xs text-zinc-500">
+            {currency} best buy rate — last {rangeLabel}
+          </p>
+        </div>
+        {rangePills}
       </div>
       <svg
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
         preserveAspectRatio="none"
-        className="mt-1 h-16 w-full"
+        className="mt-3 h-16 w-full"
       >
         <path d={areaPath} fill={fillColor} stroke="none" />
         <path d={linePath} fill="none" stroke={strokeColor} strokeWidth="2" />
