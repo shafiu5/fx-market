@@ -6,10 +6,21 @@ import { register } from "@/app/actions/auth";
 import CameraCapture from "@/components/CameraCapture";
 import FileUploadBox from "@/components/FileUploadBox";
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default function RegisterPage() {
   const [state, action, pending] = useActionState(register, undefined);
   const [role, setRole] = useState<"BUYER" | "SELLER">("BUYER");
   const [isBusiness, setIsBusiness] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [emailTouched, setEmailTouched] = useState(false);
+
+  const emailFormatError =
+    emailTouched && email.length > 0 && !EMAIL_PATTERN.test(email)
+      ? "Enter a valid email address."
+      : null;
 
   return (
     <main className="mx-auto flex min-h-[80vh] max-w-md flex-col justify-center px-4 py-10">
@@ -27,6 +38,8 @@ export default function RegisterPage() {
           <input
             name="name"
             type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
             placeholder="Jane Doe"
           />
@@ -40,11 +53,20 @@ export default function RegisterPage() {
           <input
             name="email"
             type="email"
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            onBlur={() => setEmailTouched(true)}
+            className={`w-full rounded-md border px-3 py-2 text-sm dark:bg-zinc-900 ${
+              emailFormatError || state?.errors?.email
+                ? "border-red-400 dark:border-red-700"
+                : "border-zinc-300 dark:border-zinc-700"
+            }`}
             placeholder="you@example.com"
           />
-          {state?.errors?.email && (
-            <p className="mt-1 text-xs text-red-600">{state.errors.email[0]}</p>
+          {(emailFormatError || state?.errors?.email) && (
+            <p className="mt-1 text-xs text-red-600">
+              {emailFormatError ?? state?.errors?.email?.[0]}
+            </p>
           )}
         </div>
 
@@ -53,6 +75,8 @@ export default function RegisterPage() {
           <input
             name="password"
             type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
             placeholder="At least 8 characters"
           />

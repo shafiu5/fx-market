@@ -123,12 +123,12 @@ export async function login(
 
   const user = await db.user.findUnique({ where: { email } });
   if (!user) {
-    return { message: "No account found with that email." };
+    return { errors: { email: ["No account found with that email."] } };
   }
 
   const passwordsMatch = await bcrypt.compare(password, user.passwordHash);
   if (!passwordsMatch) {
-    return { message: "Incorrect password." };
+    return { errors: { password: ["Incorrect password."] } };
   }
 
   if (user.suspended) {
