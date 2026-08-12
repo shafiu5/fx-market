@@ -13,13 +13,13 @@ import { DEFAULT_CURRENCY, isCurrencyCode, currencyName } from "@/lib/config";
 const SORTS = [
   {
     value: "buy",
-    label: "Best rate to buy",
+    label: "Best buy",
     description: (currency: string) =>
       `Sorted by best (lowest) rate to buy ${currency}.`,
   },
   {
     value: "sell",
-    label: "Highest rate to sell",
+    label: "Best sell",
     description: (currency: string) =>
       `Sorted by highest rate to sell ${currency}.`,
   },
@@ -85,15 +85,14 @@ export default async function Home({
         {SORTS.find((s) => s.value === sort)?.description(currency)}
       </p>
 
-      <div className="mt-6 flex flex-wrap items-center gap-3">
+      <div className="mt-6 flex flex-nowrap items-center gap-2 overflow-x-auto">
         <CurrencySelect currency={currency} sort={sort} range={range} />
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-medium text-zinc-500">Sort:</span>
+        <div className="flex shrink-0 gap-1.5">
           {SORTS.map((s) => (
             <Link
               key={s.value}
               href={`/?currency=${currency}&sort=${s.value}&range=${range}`}
-              className={`rounded-full px-3 py-1.5 text-sm font-medium ${
+              className={`rounded-full px-2.5 py-1 text-xs font-medium whitespace-nowrap ${
                 s.value === sort
                   ? "bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900"
                   : "border border-zinc-300 text-zinc-600 dark:border-zinc-700 dark:text-zinc-400"
