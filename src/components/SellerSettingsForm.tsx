@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { updateVerificationDocuments } from "@/app/actions/seller-settings";
 import CameraCapture from "@/components/CameraCapture";
+import FileUploadBox from "@/components/FileUploadBox";
 
 function CurrentFile({ path }: { path: string | null }) {
   if (!path) {
@@ -48,12 +49,7 @@ export default function SellerSettingsForm({
           </label>
           <CurrentFile path={fxLicensePath} />
         </div>
-        <input
-          name="fxLicense"
-          type="file"
-          accept="image/*,application/pdf"
-          className="w-full text-sm"
-        />
+        <FileUploadBox name="fxLicense" accept="image/*,application/pdf" />
         <p className="mt-1 text-xs text-zinc-500">
           Leave empty to keep your current file.
         </p>
@@ -77,11 +73,9 @@ export default function SellerSettingsForm({
             </label>
             <CurrentFile path={businessRegistrationPath} />
           </div>
-          <input
+          <FileUploadBox
             name="businessRegistration"
-            type="file"
             accept="image/*,application/pdf"
-            className="w-full text-sm"
           />
           {state?.errors?.businessRegistration && (
             <p className="mt-1 text-xs text-red-600">
@@ -101,12 +95,7 @@ export default function SellerSettingsForm({
           </label>
           <CurrentFile path={idCardPath} />
         </div>
-        <input
-          name="idCard"
-          type="file"
-          accept="image/*,application/pdf"
-          className="w-full text-sm"
-        />
+        <FileUploadBox name="idCard" accept="image/*,application/pdf" />
         <p className="mt-1 text-xs text-zinc-500">
           Leave empty to keep your current file.
         </p>

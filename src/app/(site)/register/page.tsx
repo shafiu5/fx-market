@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import Link from "next/link";
 import { register } from "@/app/actions/auth";
 import CameraCapture from "@/components/CameraCapture";
+import FileUploadBox from "@/components/FileUploadBox";
 
 export default function RegisterPage() {
   const [state, action, pending] = useActionState(register, undefined);
@@ -105,12 +106,7 @@ export default function RegisterPage() {
               <label className="mb-1 block text-sm font-medium">
                 Foreign exchange license
               </label>
-              <input
-                name="fxLicense"
-                type="file"
-                accept="image/*,application/pdf"
-                className="w-full text-sm"
-              />
+              <FileUploadBox name="fxLicense" accept="image/*,application/pdf" />
               {state?.errors?.fxLicense && (
                 <p className="mt-1 text-xs text-red-600">
                   {state.errors.fxLicense[0]}
@@ -133,11 +129,9 @@ export default function RegisterPage() {
                 <label className="mb-1 block text-sm font-medium">
                   Business registration
                 </label>
-                <input
+                <FileUploadBox
                   name="businessRegistration"
-                  type="file"
                   accept="image/*,application/pdf"
-                  className="w-full text-sm"
                 />
                 {state?.errors?.businessRegistration && (
                   <p className="mt-1 text-xs text-red-600">
@@ -151,12 +145,7 @@ export default function RegisterPage() {
               <label className="mb-1 block text-sm font-medium">
                 ID card of the responsible person
               </label>
-              <input
-                name="idCard"
-                type="file"
-                accept="image/*,application/pdf"
-                className="w-full text-sm"
-              />
+              <FileUploadBox name="idCard" accept="image/*,application/pdf" />
               {state?.errors?.idCard && (
                 <p className="mt-1 text-xs text-red-600">
                   {state.errors.idCard[0]}
