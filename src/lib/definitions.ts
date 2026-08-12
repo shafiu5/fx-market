@@ -38,6 +38,20 @@ export type VerificationDocsFormState =
     }
   | undefined;
 
+export type BecomeSellerFormState =
+  | {
+      errors?: {
+        fxLicense?: string[];
+        businessRegistration?: string[];
+        idCard?: string[];
+        livePhoto?: string[];
+      };
+      message?: string;
+    }
+  | undefined;
+
+export type BecomeBuyerFormState = { message?: string } | undefined;
+
 export const PhoneSchema = z.object({
   phone: phoneField,
 });

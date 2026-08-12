@@ -7,12 +7,15 @@ import PhoneForm from "@/components/PhoneForm";
 import PaymentRequestDialog from "@/components/PaymentRequestDialog";
 import { requestSubscriptionRenewal, requestBoost } from "@/app/actions/payments";
 import { disconnectTelegram } from "@/app/actions/telegram";
+import BecomeSellerForm from "@/components/BecomeSellerForm";
+import BecomeBuyerButton from "@/components/BecomeBuyerButton";
 
 const TABS = [
-  { value: "contact", label: "Contact" },
-  { value: "subscription", label: "Subscription" },
-  { value: "boost", label: "Boost" },
-  { value: "notifications", label: "Notifications" },
+  { value: "contact", label: "Contact", roles: ["BUYER", "SELLER"] },
+  { value: "subscription", label: "Subscription", roles: ["SELLER"] },
+  { value: "boost", label: "Boost", roles: ["SELLER"] },
+  { value: "notifications", label: "Notifications", roles: ["SELLER"] },
+  { value: "account", label: "Account", roles: ["BUYER", "SELLER"] },
 ] as const;
 
 type Tab = (typeof TABS)[number]["value"];
@@ -25,8 +28,8 @@ export default async function SettingsPage({
   const session = await verifySession();
   const { tab: rawTab } = await searchParams;
   const isSeller = session.role === "SELLER";
-  const tab: Tab =
-    isSeller && TABS.some((t) => t.value === rawTab) ? (rawTab as Tab) : "contact";
+  const visibleTabs = TABS.filter((t) => (t.roles as readonly string[]).includes(session.role));
+  const tab: Tab = visibleTabs.some((t) => t.value === rawTab) ? (rawTab as Tab) : "contact";
 
   const me = await db.user.findUniqueOrThrow({
     where: { id: session.userId },
@@ -120,27 +123,32 @@ export default async function SettingsPage({
     ? `https://t.me/${botUsername}?start=${session.userId}`
     : null;
 
+  const activeSellerOrders =
+    isSeller && tab === "account"
+      ? await db.order.count({
+          where: { sellerId: session.userId, status: { in: ["PENDING", "CONFIRMED"] } },
+        })
+      : 0;
+
   return (
     <main className="mx-auto max-w-md px-4 py-10">
       <h1 className="text-2xl font-semibold">Settings</h1>
 
-      {isSeller && (
-        <div className="mt-6 flex flex-wrap gap-2">
-          {TABS.map((t) => (
-            <Link
-              key={t.value}
-              href={`/settings?tab=${t.value}`}
-              className={`rounded-full px-3 py-1.5 text-sm font-medium ${
-                t.value === tab
-                  ? "bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900"
-                  : "border border-zinc-300 text-zinc-600 dark:border-zinc-700 dark:text-zinc-400"
-              }`}
-            >
-              {t.label}
-            </Link>
-          ))}
-        </div>
-      )}
+      <div className="mt-6 flex flex-wrap gap-2">
+        {visibleTabs.map((t) => (
+          <Link
+            key={t.value}
+            href={`/settings?tab=${t.value}`}
+            className={`rounded-full px-3 py-1.5 text-sm font-medium ${
+              t.value === tab
+                ? "bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900"
+                : "border border-zinc-300 text-zinc-600 dark:border-zinc-700 dark:text-zinc-400"
+            }`}
+          >
+            {t.label}
+          </Link>
+        ))}
+      </div>
 
       {tab === "contact" && (
         <div className="mt-6 rounded-lg border border-zinc-200 p-5 dark:border-zinc-800">
@@ -186,6 +194,35 @@ export default async function SettingsPage({
             <p className="mt-4 text-xs text-zinc-400">
               Telegram notifications aren&apos;t configured yet.
             </p>
+          )}
+        </div>
+      )}
+
+      {tab === "account" && (
+        <div className="mt-6 rounded-lg border border-zinc-200 p-5 dark:border-zinc-800">
+          {isSeller ? (
+            <>
+              <p className="text-sm font-medium">Switch to a buyer account</p>
+              <p className="mt-1 text-sm text-zinc-500">
+                This removes your posted rates from the market. Your account
+                history and past orders are kept.
+              </p>
+              {activeSellerOrders > 0 && (
+                <p className="mt-3 text-sm text-amber-600 dark:text-amber-400">
+                  You have {activeSellerOrders} active order
+                  {activeSellerOrders === 1 ? "" : "s"} as a seller — complete
+                  or cancel {activeSellerOrders === 1 ? "it" : "them"} first.
+                </p>
+              )}
+              <div className="mt-4">
+                <BecomeBuyerButton />
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-sm font-medium">Switch to a seller account</p>
+              <BecomeSellerForm />
+            </>
           )}
         </div>
       )}
