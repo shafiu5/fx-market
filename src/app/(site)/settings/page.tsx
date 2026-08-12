@@ -6,11 +6,13 @@ import { isSubscriptionActive, isBoosted } from "@/lib/boost";
 import PhoneForm from "@/components/PhoneForm";
 import PaymentRequestDialog from "@/components/PaymentRequestDialog";
 import { requestSubscriptionRenewal, requestBoost } from "@/app/actions/payments";
+import { disconnectTelegram } from "@/app/actions/telegram";
 
 const TABS = [
   { value: "contact", label: "Contact" },
   { value: "subscription", label: "Subscription" },
   { value: "boost", label: "Boost" },
+  { value: "notifications", label: "Notifications" },
 ] as const;
 
 type Tab = (typeof TABS)[number]["value"];
@@ -33,6 +35,7 @@ export default async function SettingsPage({
       subscriptionActive: true,
       subscriptionExpiresAt: true,
       boostedUntil: true,
+      telegramChatId: true,
     },
   });
 
@@ -112,12 +115,17 @@ export default async function SettingsPage({
     );
   }
 
+  const botUsername = process.env.TELEGRAM_BOT_USERNAME;
+  const connectHref = botUsername
+    ? `https://t.me/${botUsername}?start=${session.userId}`
+    : null;
+
   return (
     <main className="mx-auto max-w-md px-4 py-10">
       <h1 className="text-2xl font-semibold">Settings</h1>
 
       {isSeller && (
-        <div className="mt-6 flex gap-2">
+        <div className="mt-6 flex flex-wrap gap-2">
           {TABS.map((t) => (
             <Link
               key={t.value}
@@ -143,6 +151,44 @@ export default async function SettingsPage({
 
       {tab === "subscription" && subscriptionTab}
       {tab === "boost" && boostTab}
+
+      {tab === "notifications" && (
+        <div className="mt-6 rounded-lg border border-zinc-200 p-5 dark:border-zinc-800">
+          <p className="text-sm font-medium">Telegram alerts</p>
+          <p className="mt-1 text-sm text-zinc-500">
+            Get a Telegram message the moment a buyer places a new order.
+          </p>
+
+          {me.telegramChatId ? (
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+              <span className="rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-medium text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">
+                ✅ Connected
+              </span>
+              <form action={disconnectTelegram}>
+                <button
+                  type="submit"
+                  className="rounded-md border border-red-300 px-3 py-1.5 text-xs font-medium text-red-700 dark:border-red-800 dark:text-red-400"
+                >
+                  Disconnect
+                </button>
+              </form>
+            </div>
+          ) : connectHref ? (
+            <a
+              href={connectHref}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-4 inline-block rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white dark:bg-zinc-50 dark:text-zinc-900"
+            >
+              Connect Telegram
+            </a>
+          ) : (
+            <p className="mt-4 text-xs text-zinc-400">
+              Telegram notifications aren&apos;t configured yet.
+            </p>
+          )}
+        </div>
+      )}
     </main>
   );
 }

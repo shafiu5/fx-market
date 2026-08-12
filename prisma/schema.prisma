@@ -70,6 +70,10 @@ model User {
   subscriptionExpiresAt DateTime?
   boostedUntil          DateTime?
 
+  // Set once the seller completes the Telegram bot's /start deep link;
+  // used to DM them when a buyer places a new order.
+  telegramChatId String?
+
   sellerRates SellerRate[]
 
   ordersAsBuyer   Order[]          @relation("BuyerOrders")

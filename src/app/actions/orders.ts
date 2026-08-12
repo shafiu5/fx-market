@@ -6,6 +6,8 @@ import { db } from "@/lib/db";
 import { verifySession } from "@/lib/dal";
 import { OrderSchema, OrderFormState } from "@/lib/definitions";
 import { isSubscriptionActive } from "@/lib/boost";
+import { sendTelegramMessage } from "@/lib/telegram";
+import { LOCAL_CURRENCY } from "@/lib/config";
 
 export async function createOrder(
   _state: OrderFormState,
@@ -34,7 +36,12 @@ export async function createOrder(
     where: { sellerId_currency: { sellerId, currency } },
     include: {
       seller: {
-        select: { suspended: true, subscriptionActive: true, subscriptionExpiresAt: true },
+        select: {
+          suspended: true,
+          subscriptionActive: true,
+          subscriptionExpiresAt: true,
+          telegramChatId: true,
+        },
       },
     },
   });
@@ -73,6 +80,15 @@ export async function createOrder(
       buyerOrdersViewedAt: new Date(),
     },
   });
+
+  if (sellerRate.seller.telegramChatId) {
+    await sendTelegramMessage(
+      sellerRate.seller.telegramChatId,
+      `🔔 <b>New ${type === "BUY" ? "buy" : "sell"} order</b>\n` +
+        `${amount.toLocaleString()} ${currency} @ ${rate.toFixed(2)} ${LOCAL_CURRENCY}\n` +
+        `Buyer: ${me.name} (${contactPhone})`
+    );
+  }
 
   revalidatePath("/orders");
   revalidatePath("/seller");
