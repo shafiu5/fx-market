@@ -123,12 +123,12 @@ export async function login(
 
   const user = await db.user.findUnique({ where: { email } });
   if (!user) {
-    return { message: "Invalid email or password." };
+    return { message: "No account found with that email." };
   }
 
   const passwordsMatch = await bcrypt.compare(password, user.passwordHash);
   if (!passwordsMatch) {
-    return { message: "Invalid email or password." };
+    return { message: "Incorrect password." };
   }
 
   if (user.suspended) {
