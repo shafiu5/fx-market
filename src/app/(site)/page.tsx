@@ -83,7 +83,7 @@ export default async function Home({
       where: { currency, createdAt: { gte: since } },
       orderBy: { createdAt: "asc" },
       take: 500,
-      select: { rate: true },
+      select: { avgBuyRate: true, avgSellRate: true },
     }),
     pickActiveAd(),
   ]);
@@ -96,7 +96,9 @@ export default async function Home({
     return aBoosted - bBoosted;
   });
 
-  const sparklinePoints = snapshots.map((s) => s.rate);
+  const sparklinePoints = snapshots.map((s) =>
+    sort === "sell" ? s.avgSellRate : s.avgBuyRate
+  );
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">

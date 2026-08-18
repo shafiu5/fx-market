@@ -87,7 +87,8 @@ export default function RateSparkline({
             {last.toFixed(2)} {LOCAL_CURRENCY}
           </p>
           <p className="mt-0.5 text-xs text-zinc-500">
-            {currency} best buy rate — last {rangeLabel}
+            {currency} average {sort === "sell" ? "sell" : "buy"} rate — last{" "}
+            {rangeLabel}
           </p>
         </div>
         {rangePills}

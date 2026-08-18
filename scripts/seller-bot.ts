@@ -88,15 +88,17 @@ async function nudgeRates(botIds: string[]) {
   }
   console.log(`[bot] nudged ${rates.length} rates`);
 
-  // Snapshot the market's best (lowest) rate to buy each touched currency —
-  // same metric the rate board's default sort and the trend graph use.
+  // Snapshot the market's average buy/sell rate for each touched currency —
+  // same metric the trend graph plots.
   for (const currency of currencies) {
-    const best = await db.sellerRate.aggregate({
+    const avg = await db.sellerRate.aggregate({
       where: { currency, buyRate: { gt: 0 }, sellRate: { gt: 0 }, seller: { suspended: false } },
-      _min: { sellRate: true },
+      _avg: { buyRate: true, sellRate: true },
     });
-    if (best._min.sellRate != null) {
-      await db.rateSnapshot.create({ data: { currency, rate: best._min.sellRate } });
+    if (avg._avg.buyRate != null && avg._avg.sellRate != null) {
+      await db.rateSnapshot.create({
+        data: { currency, avgBuyRate: avg._avg.buyRate, avgSellRate: avg._avg.sellRate },
+      });
     }
   }
 }

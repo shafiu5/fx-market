@@ -147,14 +147,16 @@ model SellerRate {
   @@unique([sellerId, currency])
 }
 
-// Point-in-time snapshot of the market's best (buyer-favorable) rate for a
+// Point-in-time snapshot of the market's average buy/sell rate for a
 // currency, recorded whenever any seller's rate for it changes. Powers the
-// small trend graph on the rate board.
+// small trend graph on the rate board — avgBuyRate is plotted when the
+// board is sorted by "Best buy", avgSellRate when sorted by "Best sell".
 model RateSnapshot {
-  id        String   @id @default(cuid())
-  currency  String
-  rate      Float
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  currency    String
+  avgBuyRate  Float
+  avgSellRate Float
+  createdAt   DateTime @default(now())
 
   @@index([currency, createdAt])
 }
