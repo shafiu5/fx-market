@@ -38,7 +38,7 @@ export default function RateForm({
             step="0.01"
             min="0"
             defaultValue={buyRate || ""}
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+            className="w-full rounded-md border border-zinc-300 px-3 py-2 font-mono text-sm dark:border-zinc-700 dark:bg-zinc-900"
           />
         </div>
 
@@ -52,7 +52,7 @@ export default function RateForm({
             step="0.01"
             min="0"
             defaultValue={sellRate || ""}
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+            className="w-full rounded-md border border-zinc-300 px-3 py-2 font-mono text-sm dark:border-zinc-700 dark:bg-zinc-900"
           />
         </div>
       </div>

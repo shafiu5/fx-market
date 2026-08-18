@@ -174,12 +174,14 @@ export default async function Home({
                     label="They buy at"
                     rate={row.buyRate}
                     favorableDirection="up"
+                    tone="buy"
                   />
                   <RateFlashBox
                     href={sellHref}
                     label="They sell at"
                     rate={row.sellRate}
                     favorableDirection="down"
+                    tone="sell"
                   />
                 </div>
               </div>

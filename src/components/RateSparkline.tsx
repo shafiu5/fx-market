@@ -82,7 +82,7 @@ export default function RateSparkline({
       <div className="flex items-start justify-between gap-3">
         <div>
           <p
-            className={`text-3xl font-semibold tabular-nums ${rose ? "text-emerald-600" : "text-red-600"}`}
+            className={`font-mono text-3xl font-semibold tabular-nums ${rose ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}
           >
             {last.toFixed(2)} {LOCAL_CURRENCY}
           </p>

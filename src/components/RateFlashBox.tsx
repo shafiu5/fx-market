@@ -16,11 +16,13 @@ export default function RateFlashBox({
   // "up" = a higher rate is better for the buyer (the "they buy at" box);
   // "down" = a lower rate is better for the buyer (the "they sell at" box).
   favorableDirection,
+  tone,
 }: {
   href: string;
   label: string;
   rate: number;
   favorableDirection: "up" | "down";
+  tone: "buy" | "sell";
 }) {
   const prevRate = useRef(rate);
   const [flash, setFlash] = useState<Flash>(null);
@@ -49,7 +51,13 @@ export default function RateFlashBox({
       }`}
     >
       <p className="text-xs text-zinc-500">{label}</p>
-      <p className="font-medium">
+      <p
+        className={`font-mono font-semibold ${
+          tone === "buy"
+            ? "text-emerald-600 dark:text-emerald-400"
+            : "text-red-600 dark:text-red-400"
+        }`}
+      >
         {rate.toFixed(2)} {LOCAL_CURRENCY}
       </p>
     </Link>

@@ -1,8 +1,13 @@
 @import "tailwindcss";
 
+/* Midnight terminal: the app is always dark, so `dark:` is driven by a
+   class on <html> instead of the OS preference — a trading-terminal look
+   shouldn't flip to white just because the visitor's OS is in light mode. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #070c16;
+  --foreground: #eef2f8;
 }
 
 @theme inline {
@@ -10,17 +15,25 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Navy-tinted replacement for Tailwind's default zinc ramp — every
+     existing `bg-zinc-*` / `dark:text-zinc-*` class in the app repaints
+     into the terminal palette without touching each component. */
+  --color-zinc-50: #eef2f8;
+  --color-zinc-100: #e2e7f0;
+  --color-zinc-200: #c9d2e3;
+  --color-zinc-300: #aebbd4;
+  --color-zinc-400: #8798b8;
+  --color-zinc-500: #55688f;
+  --color-zinc-600: #34456b;
+  --color-zinc-700: #223252;
+  --color-zinc-800: #141f38;
+  --color-zinc-900: #0d1526;
+  --color-zinc-950: #070c16;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), ui-sans-serif, Arial, Helvetica, sans-serif;
 }
