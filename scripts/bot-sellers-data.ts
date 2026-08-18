@@ -22,7 +22,7 @@ export const BOT_SELLERS: BotSellerSeed[] = [
     isBusiness: true,
     verificationStatus: "VERIFIED",
     boosted: true,
-    rates: { USD: [17.6, 18.2], EUR: [18.9, 19.6], MYR: [3.75, 3.95], CNY: [2.42, 2.58] },
+    rates: { USD: [22.55, 22.78], EUR: [18.9, 19.6], MYR: [3.75, 3.95], CNY: [2.42, 2.58] },
   },
   {
     slug: "hulhumale-fx",
@@ -31,7 +31,7 @@ export const BOT_SELLERS: BotSellerSeed[] = [
     isBusiness: false,
     verificationStatus: "PENDING",
     boosted: false,
-    rates: { USD: [17.5, 18.35], EUR: [18.7, 19.8] },
+    rates: { USD: [22.45, 22.85], EUR: [18.7, 19.8] },
   },
   {
     slug: "airport-corner",
@@ -40,7 +40,7 @@ export const BOT_SELLERS: BotSellerSeed[] = [
     isBusiness: true,
     verificationStatus: "VERIFIED",
     boosted: false,
-    rates: { USD: [17.8, 18.1], MYR: [3.7, 3.9], CNY: [2.45, 2.6] },
+    rates: { USD: [22.52, 22.75], MYR: [3.7, 3.9], CNY: [2.45, 2.6] },
   },
   {
     slug: "addu-money",
@@ -49,7 +49,7 @@ export const BOT_SELLERS: BotSellerSeed[] = [
     isBusiness: false,
     verificationStatus: "PENDING",
     boosted: false,
-    rates: { USD: [17.4, 18.4], EUR: [18.6, 20.0], CNY: [2.38, 2.65] },
+    rates: { USD: [22.4, 22.9], EUR: [18.6, 20.0], CNY: [2.38, 2.65] },
   },
   {
     slug: "villa-point",
@@ -58,7 +58,7 @@ export const BOT_SELLERS: BotSellerSeed[] = [
     isBusiness: true,
     verificationStatus: "VERIFIED",
     boosted: false,
-    rates: { USD: [17.65, 18.15], MYR: [3.72, 3.98] },
+    rates: { USD: [22.5, 22.8], MYR: [3.72, 3.98] },
   },
   {
     slug: "coral-hub",
@@ -67,7 +67,7 @@ export const BOT_SELLERS: BotSellerSeed[] = [
     isBusiness: false,
     verificationStatus: "PENDING",
     boosted: false,
-    rates: { USD: [17.55, 18.25], EUR: [18.8, 19.7], MYR: [3.68, 3.92], CNY: [2.4, 2.55] },
+    rates: { USD: [22.48, 22.82], EUR: [18.8, 19.7], MYR: [3.68, 3.92], CNY: [2.4, 2.55] },
   },
   {
     slug: "maafushi-fx",
@@ -76,7 +76,7 @@ export const BOT_SELLERS: BotSellerSeed[] = [
     isBusiness: true,
     verificationStatus: "PENDING",
     boosted: false,
-    rates: { USD: [17.7, 18.05] },
+    rates: { USD: [22.53, 22.77] },
   },
   {
     slug: "nasheed-forex",
@@ -85,7 +85,7 @@ export const BOT_SELLERS: BotSellerSeed[] = [
     isBusiness: false,
     verificationStatus: "VERIFIED",
     boosted: false,
-    rates: { USD: [17.45, 18.5], EUR: [18.5, 20.2], MYR: [3.6, 4.05], CNY: [2.35, 2.7] },
+    rates: { USD: [22.42, 22.88], EUR: [18.5, 20.2], MYR: [3.6, 4.05], CNY: [2.35, 2.7] },
   },
 ];
 
