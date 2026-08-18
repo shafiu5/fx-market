@@ -2,7 +2,13 @@
 
 import { useEffect } from "react";
 
-type Ad = { id: string; advertiserName: string; imagePath: string };
+type Ad = {
+  id: string;
+  advertiserName: string;
+  imagePath: string;
+  focalX: number;
+  focalY: number;
+};
 
 export default function AdTile({ ad }: { ad: Ad }) {
   useEffect(() => {
@@ -26,6 +32,7 @@ export default function AdTile({ ad }: { ad: Ad }) {
       <img
         src={`/ad-images/${ad.imagePath}`}
         alt={ad.advertiserName}
+        style={{ objectPosition: `${ad.focalX}% ${ad.focalY}%` }}
         className="absolute inset-0 h-full w-full object-cover"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/0 to-transparent" />

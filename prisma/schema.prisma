@@ -168,6 +168,10 @@ model Advertisement {
   id             String   @id @default(cuid())
   advertiserName String
   imagePath      String
+  // CSS object-position percentages — where the tile crop is centered,
+  // chosen by the admin by clicking the preview image.
+  focalX         Int      @default(50)
+  focalY         Int      @default(50)
   linkUrl        String
   active         Boolean  @default(true)
   weight         Int      @default(1)

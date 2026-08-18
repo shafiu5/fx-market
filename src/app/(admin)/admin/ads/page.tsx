@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { isAdmin } from "@/lib/admin-session";
 import { db } from "@/lib/db";
 import AdminNav from "@/components/AdminNav";
-import FileUploadBox from "@/components/FileUploadBox";
+import AdForm from "@/components/AdForm";
 import DeleteAdButton from "@/components/DeleteAdButton";
 import { createAd, updateAd, setAdActive } from "@/app/actions/ads";
 
@@ -30,58 +30,9 @@ export default async function AdminAdsPage() {
 
         <section className="mt-6 rounded-lg border border-zinc-200 p-5 dark:border-zinc-800">
           <h2 className="text-sm font-medium text-zinc-500">New ad</h2>
-          <form action={createAd} className="mt-3 flex flex-col gap-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="mb-1 block text-xs font-medium text-zinc-500">
-                  Advertiser name
-                </label>
-                <input
-                  name="advertiserName"
-                  type="text"
-                  required
-                  className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-zinc-500">
-                  Weight
-                </label>
-                <input
-                  name="weight"
-                  type="number"
-                  min="1"
-                  defaultValue="1"
-                  required
-                  className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-zinc-500">
-                Link URL
-              </label>
-              <input
-                name="linkUrl"
-                type="url"
-                required
-                placeholder="https://example.com"
-                className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-zinc-500">
-                Creative image
-              </label>
-              <FileUploadBox name="image" accept="image/*" />
-            </div>
-            <button
-              type="submit"
-              className="self-start rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white dark:bg-zinc-50 dark:text-zinc-900"
-            >
-              Add ad
-            </button>
-          </form>
+          <div className="mt-3">
+            <AdForm action={createAd} mode="create" />
+          </div>
         </section>
 
         <section className="mt-6 flex flex-col gap-4">
@@ -101,6 +52,7 @@ export default async function AdminAdsPage() {
                     <img
                       src={`/ad-images/${ad.imagePath}`}
                       alt={ad.advertiserName}
+                      style={{ objectPosition: `${ad.focalX}% ${ad.focalY}%` }}
                       className="h-12 w-20 rounded-md object-cover"
                     />
                   )}
@@ -145,66 +97,19 @@ export default async function AdminAdsPage() {
                 <span>CTR {ctr(ad.clicks, ad.impressions)}</span>
               </div>
 
-              <form
-                action={updateAd}
-                className="mt-4 flex flex-wrap items-end gap-2 border-t border-zinc-200 pt-4 dark:border-zinc-800"
-              >
-                <input type="hidden" name="id" value={ad.id} />
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-zinc-500">
-                    Advertiser name
-                  </label>
-                  <input
-                    name="advertiserName"
-                    type="text"
-                    defaultValue={ad.advertiserName}
-                    required
-                    className="w-40 rounded-md border border-zinc-300 px-2.5 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-zinc-500">
-                    Link URL
-                  </label>
-                  <input
-                    name="linkUrl"
-                    type="url"
-                    defaultValue={ad.linkUrl}
-                    required
-                    className="w-48 rounded-md border border-zinc-300 px-2.5 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-zinc-500">
-                    Weight
-                  </label>
-                  <input
-                    name="weight"
-                    type="number"
-                    min="1"
-                    defaultValue={ad.weight}
-                    required
-                    className="w-16 rounded-md border border-zinc-300 px-2.5 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-zinc-500">
-                    Replace image
-                  </label>
-                  <input
-                    name="image"
-                    type="file"
-                    accept="image/*"
-                    className="w-40 text-xs"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium dark:border-zinc-700"
-                >
-                  Save
-                </button>
-              </form>
+              <div className="mt-4 border-t border-zinc-200 pt-4 dark:border-zinc-800">
+                <AdForm
+                  action={updateAd}
+                  mode="edit"
+                  id={ad.id}
+                  defaultAdvertiserName={ad.advertiserName}
+                  defaultLinkUrl={ad.linkUrl}
+                  defaultWeight={ad.weight}
+                  defaultImageUrl={`/ad-images/${ad.imagePath}`}
+                  defaultFocalX={ad.focalX}
+                  defaultFocalY={ad.focalY}
+                />
+              </div>
             </div>
           ))}
         </section>

@@ -18,6 +18,12 @@ function isValidLinkUrl(value: string): boolean {
   }
 }
 
+function clampPercent(value: FormDataEntryValue | null): number {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 50;
+  return Math.min(100, Math.max(0, Math.round(n)));
+}
+
 export async function createAd(formData: FormData): Promise<void> {
   if (!(await isAdmin())) return;
 
@@ -25,6 +31,8 @@ export async function createAd(formData: FormData): Promise<void> {
   const linkUrl = String(formData.get("linkUrl") ?? "").trim();
   const weight = Number(formData.get("weight")) || 1;
   const image = formData.get("image");
+  const focalX = clampPercent(formData.get("focalX"));
+  const focalY = clampPercent(formData.get("focalY"));
 
   if (!advertiserName || !isValidLinkUrl(linkUrl) || !isNonEmptyFile(image) || weight < 1) {
     return;
@@ -32,7 +40,7 @@ export async function createAd(formData: FormData): Promise<void> {
 
   // The image path is keyed by ad id, so the row has to exist first.
   const ad = await db.advertisement.create({
-    data: { advertiserName, linkUrl, weight, imagePath: "" },
+    data: { advertiserName, linkUrl, weight, focalX, focalY, imagePath: "" },
   });
   const imagePath = await saveAdImage(ad.id, image);
   await db.advertisement.update({ where: { id: ad.id }, data: { imagePath } });
@@ -49,6 +57,8 @@ export async function updateAd(formData: FormData): Promise<void> {
   const linkUrl = String(formData.get("linkUrl") ?? "").trim();
   const weight = Number(formData.get("weight")) || 1;
   const image = formData.get("image");
+  const focalX = clampPercent(formData.get("focalX"));
+  const focalY = clampPercent(formData.get("focalY"));
 
   if (!id || !advertiserName || !isValidLinkUrl(linkUrl) || weight < 1) return;
 
@@ -56,7 +66,14 @@ export async function updateAd(formData: FormData): Promise<void> {
 
   await db.advertisement.update({
     where: { id },
-    data: { advertiserName, linkUrl, weight, ...(imagePath ? { imagePath } : {}) },
+    data: {
+      advertiserName,
+      linkUrl,
+      weight,
+      focalX,
+      focalY,
+      ...(imagePath ? { imagePath } : {}),
+    },
   });
 
   revalidatePath("/admin/ads");
