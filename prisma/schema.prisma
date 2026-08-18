@@ -175,6 +175,9 @@ model Advertisement {
   linkUrl        String
   active         Boolean  @default(true)
   weight         Int      @default(1)
+  // Null runs indefinitely; once passed, the ad drops out of rotation even
+  // if still marked active.
+  expiresAt      DateTime?
   impressions    Int      @default(0)
   clicks         Int      @default(0)
   createdAt      DateTime @default(now())

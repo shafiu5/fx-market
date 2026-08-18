@@ -1,11 +1,15 @@
 import "server-only";
 import { db } from "@/lib/db";
 
-// Weighted-random pick among active ads, so a higher `weight` shows up more
-// often without needing a separate scheduling system.
+// Weighted-random pick among active, unexpired ads, so a higher `weight`
+// shows up more often without needing a separate scheduling system.
 export async function pickActiveAd() {
   const ads = await db.advertisement.findMany({
-    where: { active: true, weight: { gt: 0 } },
+    where: {
+      active: true,
+      weight: { gt: 0 },
+      OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+    },
   });
   if (ads.length === 0) return null;
 

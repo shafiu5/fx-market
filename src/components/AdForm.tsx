@@ -14,6 +14,7 @@ export default function AdForm({
   defaultImageUrl,
   defaultFocalX,
   defaultFocalY,
+  defaultExpiresAt,
 }: {
   action: (formData: FormData) => Promise<void>;
   mode: "create" | "edit";
@@ -24,6 +25,7 @@ export default function AdForm({
   defaultImageUrl?: string;
   defaultFocalX?: number;
   defaultFocalY?: number;
+  defaultExpiresAt?: string;
 }) {
   const [advertiserName, setAdvertiserName] = useState(defaultAdvertiserName);
 
@@ -72,6 +74,21 @@ export default function AdForm({
           placeholder="https://example.com"
           className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
         />
+      </div>
+
+      <div>
+        <label className="mb-1 block text-xs font-medium text-zinc-500">
+          Runs until (optional)
+        </label>
+        <input
+          name="expiresAt"
+          type="date"
+          defaultValue={defaultExpiresAt}
+          className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+        />
+        <p className="mt-1 text-xs text-zinc-500">
+          Leave empty to run indefinitely.
+        </p>
       </div>
 
       <AdImagePicker

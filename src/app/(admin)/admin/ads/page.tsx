@@ -11,6 +11,25 @@ function ctr(clicks: number, impressions: number): string {
   return `${((clicks / impressions) * 100).toFixed(1)}%`;
 }
 
+function adStatus(ad: { active: boolean; expiresAt: Date | null }) {
+  if (!ad.active) {
+    return {
+      label: "Disabled",
+      className: "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400",
+    };
+  }
+  if (ad.expiresAt && ad.expiresAt.getTime() <= Date.now()) {
+    return {
+      label: "Expired",
+      className: "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300",
+    };
+  }
+  return {
+    label: ad.expiresAt ? `Active until ${ad.expiresAt.toLocaleDateString()}` : "Active",
+    className: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
+  };
+}
+
 export default async function AdminAdsPage() {
   if (!(await isAdmin())) {
     redirect("/admin/login");
@@ -71,13 +90,9 @@ export default async function AdminAdsPage() {
 
                 <div className="flex items-center gap-2">
                   <span
-                    className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
-                      ad.active
-                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300"
-                        : "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
-                    }`}
+                    className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${adStatus(ad).className}`}
                   >
-                    {ad.active ? "Active" : "Disabled"}
+                    {adStatus(ad).label}
                   </span>
                   <form action={setAdActive.bind(null, ad.id, !ad.active)}>
                     <button
@@ -108,6 +123,7 @@ export default async function AdminAdsPage() {
                   defaultImageUrl={`/ad-images/${ad.imagePath}`}
                   defaultFocalX={ad.focalX}
                   defaultFocalY={ad.focalY}
+                  defaultExpiresAt={ad.expiresAt?.toISOString().slice(0, 10)}
                 />
               </div>
             </div>
