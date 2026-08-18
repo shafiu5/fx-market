@@ -1,0 +1,78 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { db } from "@/lib/db";
+import { isAdmin } from "@/lib/admin-session";
+import { saveAdImage } from "@/lib/uploads";
+
+function isNonEmptyFile(value: FormDataEntryValue | null): value is File {
+  return value instanceof File && value.size > 0;
+}
+
+function isValidLinkUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+export async function createAd(formData: FormData): Promise<void> {
+  if (!(await isAdmin())) return;
+
+  const advertiserName = String(formData.get("advertiserName") ?? "").trim();
+  const linkUrl = String(formData.get("linkUrl") ?? "").trim();
+  const weight = Number(formData.get("weight")) || 1;
+  const image = formData.get("image");
+
+  if (!advertiserName || !isValidLinkUrl(linkUrl) || !isNonEmptyFile(image) || weight < 1) {
+    return;
+  }
+
+  // The image path is keyed by ad id, so the row has to exist first.
+  const ad = await db.advertisement.create({
+    data: { advertiserName, linkUrl, weight, imagePath: "" },
+  });
+  const imagePath = await saveAdImage(ad.id, image);
+  await db.advertisement.update({ where: { id: ad.id }, data: { imagePath } });
+
+  revalidatePath("/admin/ads");
+  revalidatePath("/");
+}
+
+export async function updateAd(formData: FormData): Promise<void> {
+  if (!(await isAdmin())) return;
+
+  const id = String(formData.get("id") ?? "");
+  const advertiserName = String(formData.get("advertiserName") ?? "").trim();
+  const linkUrl = String(formData.get("linkUrl") ?? "").trim();
+  const weight = Number(formData.get("weight")) || 1;
+  const image = formData.get("image");
+
+  if (!id || !advertiserName || !isValidLinkUrl(linkUrl) || weight < 1) return;
+
+  const imagePath = isNonEmptyFile(image) ? await saveAdImage(id, image) : undefined;
+
+  await db.advertisement.update({
+    where: { id },
+    data: { advertiserName, linkUrl, weight, ...(imagePath ? { imagePath } : {}) },
+  });
+
+  revalidatePath("/admin/ads");
+  revalidatePath("/");
+}
+
+export async function setAdActive(id: string, active: boolean): Promise<void> {
+  if (!(await isAdmin())) return;
+  await db.advertisement.update({ where: { id }, data: { active } });
+  revalidatePath("/admin/ads");
+  revalidatePath("/");
+}
+
+export async function deleteAd(id: string): Promise<void> {
+  if (!(await isAdmin())) return;
+  await db.advertisement.delete({ where: { id } });
+  revalidatePath("/admin/ads");
+  revalidatePath("/");
+}

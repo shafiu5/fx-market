@@ -1,15 +1,21 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { getOptionalSession } from "@/lib/dal";
+import { pickActiveAd } from "@/lib/ads";
 import AutoRefresh from "@/components/AutoRefresh";
 import VerificationBadge from "@/components/VerificationBadge";
 import BoostBadge from "@/components/BoostBadge";
 import RateFlashBox from "@/components/RateFlashBox";
+import AdTile from "@/components/AdTile";
 import RateSparkline, { RANGES, Range } from "@/components/RateSparkline";
 import CurrencySelect from "@/components/CurrencySelect";
 import SellerSearch from "@/components/SellerSearch";
 import { isBoosted } from "@/lib/boost";
 import { DEFAULT_CURRENCY, isCurrencyCode, currencyName } from "@/lib/config";
+
+// Fixed insertion point for the sponsored tile within the rate list (0-based).
+const AD_SLOT_INDEX = 3;
 
 const SORTS = [
   {
@@ -53,7 +59,7 @@ export default async function Home({
   const since = new Date(Date.now() - RANGES.find((r) => r.value === range)!.ms);
   const q = (rawQ ?? "").trim();
 
-  const [session, sellersRaw, snapshots] = await Promise.all([
+  const [session, sellersRaw, snapshots, ad] = await Promise.all([
     getOptionalSession(),
     db.sellerRate.findMany({
       where: {
@@ -79,6 +85,7 @@ export default async function Home({
       take: 500,
       select: { rate: true },
     }),
+    pickActiveAd(),
   ]);
 
   // Boosted sellers pin to the top; stable sort preserves the rate-based
@@ -140,7 +147,7 @@ export default async function Home({
         </p>
       ) : (
         <div className="mt-6 flex flex-col gap-2">
-          {sellers.map((row) => {
+          {sellers.map((row, i) => {
             const buyHref = session
               ? `/order/${row.seller.id}?type=SELL&currency=${currency}`
               : "/login";
@@ -149,42 +156,46 @@ export default async function Home({
               : "/login";
 
             return (
-              <div
-                key={row.id}
-                className={`flex items-center justify-between gap-2 rounded-lg border p-3 ${
-                  isBoosted(row.seller)
-                    ? "border-purple-300 bg-purple-50 dark:border-purple-800 dark:bg-purple-950/20"
-                    : "border-zinc-200 dark:border-zinc-800"
-                }`}
-              >
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="truncate font-medium">{row.seller.name}</p>
-                    <VerificationBadge status={row.seller.verificationStatus} />
-                    {isBoosted(row.seller) && <BoostBadge />}
+              <Fragment key={row.id}>
+                {ad && i === Math.min(AD_SLOT_INDEX, sellers.length - 1) && (
+                  <AdTile ad={ad} />
+                )}
+                <div
+                  className={`flex items-center justify-between gap-2 rounded-lg border p-3 ${
+                    isBoosted(row.seller)
+                      ? "border-purple-300 bg-purple-50 dark:border-purple-800 dark:bg-purple-950/20"
+                      : "border-zinc-200 dark:border-zinc-800"
+                  }`}
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="truncate font-medium">{row.seller.name}</p>
+                      <VerificationBadge status={row.seller.verificationStatus} />
+                      {isBoosted(row.seller) && <BoostBadge />}
+                    </div>
+                    <p className="mt-0.5 truncate text-xs text-zinc-500">
+                      Updated {new Date(row.updatedAt).toLocaleString()}
+                    </p>
                   </div>
-                  <p className="mt-0.5 truncate text-xs text-zinc-500">
-                    Updated {new Date(row.updatedAt).toLocaleString()}
-                  </p>
-                </div>
 
-                <div className="flex shrink-0 gap-2">
-                  <RateFlashBox
-                    href={buyHref}
-                    label="They buy at"
-                    rate={row.buyRate}
-                    favorableDirection="up"
-                    tone="buy"
-                  />
-                  <RateFlashBox
-                    href={sellHref}
-                    label="They sell at"
-                    rate={row.sellRate}
-                    favorableDirection="down"
-                    tone="sell"
-                  />
+                  <div className="flex shrink-0 gap-2">
+                    <RateFlashBox
+                      href={buyHref}
+                      label="They buy at"
+                      rate={row.buyRate}
+                      favorableDirection="up"
+                      tone="buy"
+                    />
+                    <RateFlashBox
+                      href={sellHref}
+                      label="They sell at"
+                      rate={row.sellRate}
+                      favorableDirection="down"
+                      tone="sell"
+                    />
+                  </div>
                 </div>
-              </div>
+              </Fragment>
             );
           })}
         </div>

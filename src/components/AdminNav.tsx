@@ -50,6 +50,12 @@ export default async function AdminNav() {
               </span>
             )}
           </Link>
+          <Link
+            href="/admin/ads"
+            className="text-zinc-600 hover:underline dark:text-zinc-400"
+          >
+            Ads
+          </Link>
         </div>
 
         <form action={adminLogout}>

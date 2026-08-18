@@ -159,6 +159,22 @@ model RateSnapshot {
   @@index([currency, createdAt])
 }
 
+// Admin-managed sponsored slot shown as a tile in the rate board.
+// Multiple active ads rotate by weight; impressions/clicks are tracked so
+// advertisers can be shown performance.
+model Advertisement {
+  id             String   @id @default(cuid())
+  advertiserName String
+  imagePath      String
+  linkUrl        String
+  active         Boolean  @default(true)
+  weight         Int      @default(1)
+  impressions    Int      @default(0)
+  clicks         Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
 model Order {
   id           String      @id @default(cuid())
   type         OrderType
