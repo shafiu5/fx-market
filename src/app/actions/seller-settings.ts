@@ -77,7 +77,7 @@ export async function updateVerificationDocuments(
 
   await db.user.update({ where: { id: me.id }, data: updates });
 
-  revalidatePath("/seller/settings");
+  revalidatePath("/settings");
   revalidatePath("/seller");
   revalidatePath("/");
 

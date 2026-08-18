@@ -9,11 +9,12 @@ import { requestSubscriptionRenewal, requestBoost } from "@/app/actions/payments
 import { disconnectTelegram } from "@/app/actions/telegram";
 import BecomeSellerForm from "@/components/BecomeSellerForm";
 import BecomeBuyerButton from "@/components/BecomeBuyerButton";
+import VerificationBadge from "@/components/VerificationBadge";
+import SellerSettingsForm from "@/components/SellerSettingsForm";
 
 const TABS = [
   { value: "contact", label: "Contact", roles: ["BUYER", "SELLER"] },
-  { value: "subscription", label: "Subscription", roles: ["SELLER"] },
-  { value: "boost", label: "Boost", roles: ["SELLER"] },
+  { value: "subscription", label: "Subscription & Boost", roles: ["SELLER"] },
   { value: "notifications", label: "Notifications", roles: ["SELLER"] },
   { value: "account", label: "Account", roles: ["BUYER", "SELLER"] },
 ] as const;
@@ -45,76 +46,69 @@ export default async function SettingsPage({
   const subActive = isSubscriptionActive(me);
   const boosted = isBoosted(me);
 
-  let subscriptionTab = null;
-  let boostTab = null;
+  let subscriptionBoostTab = null;
 
   if (isSeller && tab === "subscription") {
-    const [tiers, bank, pending] = await Promise.all([
+    const [subTiers, boostTiers, bank, subPending, boostPending] = await Promise.all([
       getActiveSubscriptionTiers(),
+      getActiveBoostTiers(),
       getPaymentSettings(),
       db.paymentRequest.findFirst({
         where: { sellerId: session.userId, kind: "SUBSCRIPTION", status: "PENDING" },
       }),
-    ]);
-
-    subscriptionTab = (
-      <div className="mt-6 rounded-lg border border-zinc-200 p-5 dark:border-zinc-800">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-sm font-medium">Status</p>
-            <p
-              className={`mt-1 text-sm ${subActive ? "text-emerald-600" : "text-red-600"}`}
-            >
-              {subActive
-                ? `Active until ${new Date(me.subscriptionExpiresAt!).toLocaleDateString()}`
-                : "Inactive"}
-            </p>
-          </div>
-          <PaymentRequestDialog
-            buttonLabel="Renew subscription"
-            title="Renew your subscription"
-            tiers={tiers}
-            bank={bank}
-            action={requestSubscriptionRenewal}
-            hasPendingRequest={!!pending}
-          />
-        </div>
-      </div>
-    );
-  }
-
-  if (isSeller && tab === "boost") {
-    const [tiers, bank, pending] = await Promise.all([
-      getActiveBoostTiers(),
-      getPaymentSettings(),
       db.paymentRequest.findFirst({
         where: { sellerId: session.userId, kind: "BOOST", status: "PENDING" },
       }),
     ]);
 
-    boostTab = (
-      <div className="mt-6 rounded-lg border border-zinc-200 p-5 dark:border-zinc-800">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-sm font-medium">Status</p>
-            <p
-              className={`mt-1 text-sm ${boosted ? "text-purple-600" : "text-zinc-500"}`}
-            >
-              {boosted
-                ? `Boosted until ${new Date(me.boostedUntil!).toLocaleString()}`
-                : "Not boosted"}
-            </p>
+    subscriptionBoostTab = (
+      <>
+        <div className="mt-6 rounded-lg border border-zinc-200 p-5 dark:border-zinc-800">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium">Subscription</p>
+              <p
+                className={`mt-1 text-sm ${subActive ? "text-emerald-600" : "text-red-600"}`}
+              >
+                {subActive
+                  ? `Active until ${new Date(me.subscriptionExpiresAt!).toLocaleDateString()}`
+                  : "Inactive"}
+              </p>
+            </div>
+            <PaymentRequestDialog
+              buttonLabel="Renew subscription"
+              title="Renew your subscription"
+              tiers={subTiers}
+              bank={bank}
+              action={requestSubscriptionRenewal}
+              hasPendingRequest={!!subPending}
+            />
           </div>
-          <PaymentRequestDialog
-            buttonLabel="Buy a boost"
-            title="Buy a boost"
-            tiers={tiers}
-            bank={bank}
-            action={requestBoost}
-            hasPendingRequest={!!pending}
-          />
         </div>
-      </div>
+
+        <div className="mt-4 rounded-lg border border-zinc-200 p-5 dark:border-zinc-800">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium">Boost</p>
+              <p
+                className={`mt-1 text-sm ${boosted ? "text-purple-600" : "text-zinc-500"}`}
+              >
+                {boosted
+                  ? `Boosted until ${new Date(me.boostedUntil!).toLocaleString()}`
+                  : "Not boosted"}
+              </p>
+            </div>
+            <PaymentRequestDialog
+              buttonLabel="Buy a boost"
+              title="Buy a boost"
+              tiers={boostTiers}
+              bank={bank}
+              action={requestBoost}
+              hasPendingRequest={!!boostPending}
+            />
+          </div>
+        </div>
+      </>
     );
   }
 
@@ -129,6 +123,21 @@ export default async function SettingsPage({
           where: { sellerId: session.userId, status: { in: ["PENDING", "CONFIRMED"] } },
         })
       : 0;
+
+  const verificationMe =
+    isSeller && tab === "account"
+      ? await db.user.findUniqueOrThrow({
+          where: { id: session.userId },
+          select: {
+            verificationStatus: true,
+            isBusiness: true,
+            fxLicensePath: true,
+            businessRegistrationPath: true,
+            idCardPath: true,
+            livePhotoPath: true,
+          },
+        })
+      : null;
 
   return (
     <main className="mx-auto max-w-md px-4 py-10">
@@ -157,8 +166,7 @@ export default async function SettingsPage({
         </div>
       )}
 
-      {tab === "subscription" && subscriptionTab}
-      {tab === "boost" && boostTab}
+      {tab === "subscription" && subscriptionBoostTab}
 
       {tab === "notifications" && (
         <div className="mt-6 rounded-lg border border-zinc-200 p-5 dark:border-zinc-800">
@@ -199,32 +207,56 @@ export default async function SettingsPage({
       )}
 
       {tab === "account" && (
-        <div className="mt-6 rounded-lg border border-zinc-200 p-5 dark:border-zinc-800">
-          {isSeller ? (
-            <>
-              <p className="text-sm font-medium">Switch to a buyer account</p>
-              <p className="mt-1 text-sm text-zinc-500">
-                This removes your posted rates from the market. Your account
-                history and past orders are kept.
-              </p>
-              {activeSellerOrders > 0 && (
-                <p className="mt-3 text-sm text-amber-600 dark:text-amber-400">
-                  You have {activeSellerOrders} active order
-                  {activeSellerOrders === 1 ? "" : "s"} as a seller — complete
-                  or cancel {activeSellerOrders === 1 ? "it" : "them"} first.
-                </p>
-              )}
-              <div className="mt-4">
-                <BecomeBuyerButton />
+        <>
+          {isSeller && verificationMe && (
+            <div className="mt-6 rounded-lg border border-zinc-200 p-5 dark:border-zinc-800">
+              <div className="flex items-center gap-3">
+                <p className="text-sm font-medium">Verification</p>
+                <VerificationBadge status={verificationMe.verificationStatus} />
               </div>
-            </>
-          ) : (
-            <>
-              <p className="text-sm font-medium">Switch to a seller account</p>
-              <BecomeSellerForm />
-            </>
+              <p className="mt-1 text-sm text-zinc-500">
+                Update your license and identity documents. Changing any
+                document sends your account back to pending review.
+              </p>
+              <div className="mt-4">
+                <SellerSettingsForm
+                  isBusiness={verificationMe.isBusiness}
+                  fxLicensePath={verificationMe.fxLicensePath}
+                  businessRegistrationPath={verificationMe.businessRegistrationPath}
+                  idCardPath={verificationMe.idCardPath}
+                  livePhotoPath={verificationMe.livePhotoPath}
+                />
+              </div>
+            </div>
           )}
-        </div>
+
+          <div className="mt-6 rounded-lg border border-zinc-200 p-5 dark:border-zinc-800">
+            {isSeller ? (
+              <>
+                <p className="text-sm font-medium">Switch to a buyer account</p>
+                <p className="mt-1 text-sm text-zinc-500">
+                  This removes your posted rates from the market. Your account
+                  history and past orders are kept.
+                </p>
+                {activeSellerOrders > 0 && (
+                  <p className="mt-3 text-sm text-amber-600 dark:text-amber-400">
+                    You have {activeSellerOrders} active order
+                    {activeSellerOrders === 1 ? "" : "s"} as a seller — complete
+                    or cancel {activeSellerOrders === 1 ? "it" : "them"} first.
+                  </p>
+                )}
+                <div className="mt-4">
+                  <BecomeBuyerButton />
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-sm font-medium">Switch to a seller account</p>
+                <BecomeSellerForm />
+              </>
+            )}
+          </div>
+        </>
       )}
     </main>
   );

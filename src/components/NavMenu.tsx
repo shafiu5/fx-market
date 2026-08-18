@@ -43,9 +43,6 @@ function NavLinks({
           <Link href="/seller/market" className={linkClass} onClick={onNavigate}>
             Market
           </Link>
-          <Link href="/seller/settings" className={linkClass} onClick={onNavigate}>
-            Verification
-          </Link>
         </>
       )}
 
